@@ -1,6 +1,6 @@
 <script>
   import { tick } from "svelte";
-  import { sendMessageToApiMock } from "$lib/services/chat-service.js";
+  import { sendMessageToApi } from "$lib/services/chat-service.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import { Input } from "$lib/components/ui/input/index.js";
   import { Skeleton } from "$lib/components/ui/skeleton/index.js";
@@ -49,7 +49,7 @@
     isSending = true;
 
     try {
-      const response = await sendMessageToApiMock(text);
+      const response = await sendMessageToApi(text);
       messages = [...messages, createMessage("assistant", response.reply)];
     } catch (error) {
       errorMessage = error instanceof Error ? error.message : "Could not send message.";
@@ -95,7 +95,7 @@
   <div class="mx-auto flex h-[calc(100dvh-8.5rem)] w-full max-w-4xl flex-col rounded-2xl border bg-card shadow-sm">
     <div class="border-b px-4 py-3">
       <h1 class="text-sm font-semibold tracking-tight">York AI Chat</h1>
-      <p class="text-muted-foreground text-xs">Type `/fail` to test the mock API error path.</p>
+      <p class="text-muted-foreground text-xs">Responses are fetched from the York webhook endpoint.</p>
     </div>
 
     <div bind:this={threadRef} class="flex-1 space-y-3 overflow-y-auto px-4 py-4">
