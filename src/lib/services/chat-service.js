@@ -14,11 +14,51 @@ export async function sendMessageToApi(question) {
 	}
 
 	const payload = await response.json();
-	const reply = payload?.[0]?.choices?.[0]?.message?.content;
+	const envelope = Array.isArray(payload) ? payload[0] : payload;
+	const rawMessageContent =
+		envelope?.choices?.[0]?.message?.content ??
+		envelope?.message?.content ??
+		envelope?.content ??
+		null;
 
-	if (typeof reply !== "string" || !reply.trim()) {
-		throw new Error("Webhook response did not include choices[0].message.content.");
+	let messageContent = rawMessageContent;
+	if (typeof rawMessageContent === "string") {
+		const trimmed = rawMessageContent.trim();
+		if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+			try {
+				const parsed = JSON.parse(trimmed);
+				if (parsed && typeof parsed === "object") {
+					messageContent = parsed;
+				}
+			} catch {
+				messageContent = rawMessageContent;
+			}
+		}
 	}
 
-	return { reply };
+	const reply =
+		typeof messageContent === "string"
+			? messageContent
+			: messageContent?.content ?? messageContent?.reply ?? messageContent?.text;
+
+	const sourceCandidates =
+		messageContent?.sources ?? envelope?.sources ?? payload?.sources;
+	const sources = Array.isArray(sourceCandidates)
+		? sourceCandidates.filter((source) => {
+			if (typeof source !== "string") return false;
+
+			try {
+				const parsed = new URL(source);
+				return parsed.protocol === "http:" || parsed.protocol === "https:";
+			} catch {
+				return false;
+			}
+		})
+		: [];
+
+	if (typeof reply !== "string" || !reply.trim()) {
+		throw new Error("Webhook response did not include a valid assistant message content field.");
+	}
+
+	return { reply: reply.trim(), sources };
 }

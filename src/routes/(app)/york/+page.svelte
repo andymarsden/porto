@@ -16,16 +16,18 @@
     {
       id: crypto.randomUUID(),
       role: "assistant",
-      text: "Hello. I am your York assistant. Ask me anything and I will echo it back for now.",
+      text: "Hello. I am your CYC AI assistant. Ask me anything and I will do my best to help you.",
+      sources: [],
       createdAt: Date.now(),
     },
   ]);
 
-  function createMessage(role, text) {
+  function createMessage(role, text, sources = []) {
     return {
       id: crypto.randomUUID(),
       role,
       text,
+      sources,
       createdAt: Date.now(),
     };
   }
@@ -50,7 +52,7 @@
 
     try {
       const response = await sendMessageToApi(text);
-      messages = [...messages, createMessage("assistant", response.reply)];
+      messages = [...messages, createMessage("assistant", response.reply, response.sources)];
     } catch (error) {
       errorMessage = error instanceof Error ? error.message : "Could not send message.";
     } finally {
@@ -107,6 +109,20 @@
               : "bg-muted text-foreground"}`}
           >
             <p class="whitespace-pre-wrap leading-relaxed">{message.text}</p>
+            {#if message.role === "assistant" && message.sources?.length}
+              <div class="mt-2 space-y-1">
+                {#each message.sources as source}
+                  <a
+                    href={source}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-muted-foreground hover:text-foreground block break-all text-xs underline underline-offset-2 transition-colors"
+                  >
+                    {source}
+                  </a>
+                {/each}
+              </div>
+            {/if}
             <p
               class={`mt-1 text-[11px] ${message.role === "user"
                 ? "text-primary-foreground/80"
