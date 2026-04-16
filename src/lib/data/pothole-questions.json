@@ -1,0 +1,46 @@
+[
+  {
+    "id": "hazard",
+    "prompt": "Is the pothole creating an immediate hazard to road users?",
+    "type": "single_choice",
+    "options": [
+      {
+        "key": "A",
+        "label": "Yes"
+      },
+      {
+        "key": "B",
+        "label": "No"
+      }
+    ]
+  },
+  {
+    "id": "location",
+    "prompt": "Please provide the exact location of the pothole (road name, nearest landmark, or postcode).",
+    "type": "free_text"
+  },
+  {
+    "id": "size",
+    "prompt": "How large is the pothole?",
+    "type": "single_choice",
+    "options": [
+      {
+        "key": "A",
+        "label": "Small (less than 10cm wide)"
+      },
+      {
+        "key": "B",
+        "label": "Medium (10-30cm wide)"
+      },
+      {
+        "key": "C",
+        "label": "Large (more than 30cm wide)"
+      }
+    ]
+  },
+  {
+    "id": "contact",
+    "prompt": "Please provide your preferred contact details for updates.",
+    "type": "free_text"
+  }
+]

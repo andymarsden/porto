@@ -43,6 +43,8 @@ export async function sendMessageToApi(question) {
 
 	const sourceCandidates =
 		messageContent?.sources ?? envelope?.sources ?? payload?.sources;
+	const classificationCandidate =
+		messageContent?.classification ?? envelope?.classification ?? payload?.classification;
 	const sources = Array.isArray(sourceCandidates)
 		? sourceCandidates.filter((source) => {
 			if (typeof source !== "string") return false;
@@ -60,5 +62,10 @@ export async function sendMessageToApi(question) {
 		throw new Error("Webhook response did not include a valid assistant message content field.");
 	}
 
-	return { reply: reply.trim(), sources };
+	const classification =
+		typeof classificationCandidate === "string"
+			? classificationCandidate.trim().toUpperCase()
+			: "";
+
+	return { reply: reply.trim(), sources, classification };
 }
