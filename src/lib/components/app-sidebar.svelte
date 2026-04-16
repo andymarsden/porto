@@ -13,8 +13,8 @@
 	// This is sample data.
 	const data = {
 		user: {
-			name: "shadcn",
-			email: "m@example.com",
+			name: "Andy M",
+			email: "andy@stat.co.uk",
 			avatar: "/avatars/shadcn.jpg",
 		},
 		teams: [
@@ -39,7 +39,7 @@
 				title: "Playground",
 				url: "#",
 				icon: SquareTerminalIcon,
-				isActive: true,
+				// isActive: true,
 				items: [
 					{
 						title: "History",
