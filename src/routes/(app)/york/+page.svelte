@@ -200,7 +200,7 @@
     if (isSending || !potholeFlow.active) return;
 
     const submittedValue = option.key.toLowerCase();
-    messages = [...messages, createMessage("user", submittedValue)];
+    messages = [...messages, createMessage("user", option.label)];
     await handlePotholeAnswer(submittedValue);
   }
 
@@ -218,7 +218,18 @@
     if (!text) return;
 
     errorMessage = "";
-    messages = [...messages, createMessage("user", text)];
+    let displayText = text;
+    if (potholeFlow.active) {
+      const currentQuestion = getCurrentPotholeQuestion();
+      if (currentQuestion?.type === "single_choice") {
+        const matched = normalizeSingleChoiceAnswer(currentQuestion, text);
+        if (matched) {
+          displayText = matched.label;
+        }
+      }
+    }
+
+    messages = [...messages, createMessage("user", displayText)];
     draft = "";
 
     if (potholeFlow.active) {
@@ -313,7 +324,7 @@
               </div>
             {/if}
             {#if message.role === "assistant" && potholeFlow.active && message.question?.id === getCurrentPotholeQuestion()?.id && message.question.type === "single_choice"}
-              <div class="mt-3 flex flex-wrap gap-2">
+                <div class="mt-3 flex flex-col items-start gap-2">
                 {#each message.question.options as option}
                   <Button
                     type="button"
