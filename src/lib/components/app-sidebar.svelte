@@ -7,6 +7,7 @@
 	import FrameIcon from "@lucide/svelte/icons/frame";
 	import GalleryVerticalEndIcon from "@lucide/svelte/icons/gallery-vertical-end";
 	import MapIcon from "@lucide/svelte/icons/map";
+	import MessageCircleIcon from "@lucide/svelte/icons/message-circle";
 	import Settings2Icon from "@lucide/svelte/icons/settings-2";
 	import SquareTerminalIcon from "@lucide/svelte/icons/square-terminal";
 
@@ -35,6 +36,18 @@
 			},
 		],
 		navMain: [
+			{
+				title: "York Chat",
+				url: "/york",
+				icon: MessageCircleIcon,
+				isActive: true,
+				items: [
+					{
+						title: "Assistant",
+						url: "/york",
+					},
+				],
+			},
 			{
 				title: "Playground",
 				url: "#",
