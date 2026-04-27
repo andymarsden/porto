@@ -2,6 +2,12 @@
 
 Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
 
+## Documentation
+
+Project documentation is stored in the top-level [docs](docs/) folder.
+
+- [Robots.txt Maintenance](docs/robots.md)
+
 ## Creating a project
 
 If you're seeing this, you've probably already done this step. Congrats!
