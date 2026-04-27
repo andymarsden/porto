@@ -7,6 +7,8 @@
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
+		"docs:index": "node scripts/generate-docs-index.mjs",
+		"hooks:install": "git config core.hooksPath .githooks",
 		"prepare": "svelte-kit sync || echo ''"
 	},
 	"devDependencies": {

@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+set -eu
+
+npm run docs:index
+
+# Stage README updates made by docs:index so the commit includes refreshed docs links.
+git add README.md
