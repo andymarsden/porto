@@ -9,6 +9,7 @@ Project documentation is stored in the top-level [docs](docs/) folder.
 The list below is auto-generated from markdown files in [docs](docs/). Run `npm run docs:index` after adding, removing, or renaming docs.
 
 <!-- docs-index:start -->
+- [App Areas (Web, App, Blank)](docs/app-areas.md)
 - [Documentation Workflow](docs/documentation-workflow.md)
 - [Robots.txt Maintenance](docs/robots.md)
 - [this is a test doc](docs/test.md)
