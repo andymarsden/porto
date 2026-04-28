@@ -17,7 +17,7 @@
     {
       id: crypto.randomUUID(),
       role: "assistant",
-      text: "Hello. I am your CYC AI assistant. Ask me anything and I will do my best to help you.",
+      text: "Hello. I am your Barnsley AI assistant. Ask me anything and I will do my best to help you.",
       sources: [],
       classification: "",
       createdAt: Date.now(),
