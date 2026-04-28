@@ -1,4 +1,5 @@
-const WEBHOOK_URL = "https://infojam.app.n8n.cloud/webhook/d127981d-7968-45b4-9cbd-7efaea63a0e2";
+//const WEBHOOK_URL = "https://infojam.app.n8n.cloud/webhook/d127981d-7968-45b4-9cbd-7efaea63a0e2";
+const WEBHOOK_URL = "https://infojam.app.n8n.cloud/webhook/c1bec63f-e2c4-4f37-b634-6d0b2f8ede89";
 
 export async function sendMessageToApi(question) {
 	const response = await fetch(WEBHOOK_URL, {
