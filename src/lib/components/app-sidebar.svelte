@@ -175,8 +175,8 @@
 		<NavMain items={data.navMain} />
 		<NavProjects projects={data.projects} />
 	</Sidebar.Content>
-	<Sidebar.Footer>
+	<!-- <Sidebar.Footer>
 		<NavUser user={data.user} />
-	</Sidebar.Footer>
+	</Sidebar.Footer> -->
 	<Sidebar.Rail />
 </Sidebar.Root>
