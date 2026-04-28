@@ -1,10 +1,10 @@
 <script>
+  import LoaderCircleIcon from "@lucide/svelte/icons/loader-circle";
   import { tick } from "svelte";
   import { sendMessageToApi } from "$lib/services/chat-service.js";
   import potholeQuestions from "$lib/data/pothole-questions.json";
   import { Button } from "$lib/components/ui/button/index.js";
   import { Input } from "$lib/components/ui/input/index.js";
-  import { Skeleton } from "$lib/components/ui/skeleton/index.js";
 	import * as Breadcrumb from "$lib/components/ui/breadcrumb/index.js";
 	import { Separator } from "$lib/components/ui/separator/index.js";
 	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
@@ -278,11 +278,11 @@
     <Breadcrumb.Root>
       <Breadcrumb.List>
         <Breadcrumb.Item class="hidden md:block">
-          <Breadcrumb.Link href="##">City of York Council</Breadcrumb.Link>
+          <Breadcrumb.Link href="##">AI Search</Breadcrumb.Link>
         </Breadcrumb.Item>
         <Breadcrumb.Separator class="hidden md:block" />
         <Breadcrumb.Item>
-          <Breadcrumb.Page>AI Agent</Breadcrumb.Page>
+          <Breadcrumb.Page>Barnsley</Breadcrumb.Page>
         </Breadcrumb.Item>
       </Breadcrumb.List>
     </Breadcrumb.Root>
@@ -291,8 +291,8 @@
 <div class="flex flex-1 flex-col gap-4 px-4 pb-6 pt-4">
   <div class="mx-auto flex h-[calc(100dvh-8.5rem)] w-full max-w-4xl flex-col rounded-2xl border bg-card shadow-sm">
     <div class="border-b px-4 py-3">
-      <h1 class="text-sm font-semibold tracking-tight">York AI Chat</h1>
-      <p class="text-muted-foreground text-xs">Responses are fetched from the York webhook endpoint.</p>
+      <h1 class="text-sm font-semibold tracking-tight">AI Search</h1>
+      <p class="text-muted-foreground text-xs">Responses are fetched from the AI Search webhook endpoint.</p>
     </div>
 
     <div bind:this={threadRef} class="flex-1 space-y-3 overflow-y-auto px-4 py-4">
@@ -351,10 +351,13 @@
 
       {#if isSending}
         <div class="flex justify-start">
-          <div class="bg-muted/70 w-52 rounded-2xl p-3">
-            <Skeleton class="mb-2 h-3 w-20" />
-            <Skeleton class="mb-2 h-3 w-full" />
-            <Skeleton class="h-3 w-4/5" />
+          <div
+            class="bg-muted text-muted-foreground inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-sm shadow-xs"
+            role="status"
+            aria-live="polite"
+          >
+            <LoaderCircleIcon class="size-4 animate-spin" aria-hidden="true" />
+            <span>Waiting for response...</span>
           </div>
         </div>
       {/if}
@@ -370,12 +373,17 @@
       <div class="flex items-center gap-2">
         <Input
           bind:value={draft}
-          placeholder="Message York assistant..."
+          placeholder="AI Search..."
           disabled={isSending}
           aria-label="Chat message"
         />
         <Button type="submit" disabled={isSending || !draft.trim()}>
-          {isSending ? "Sending..." : "Send"}
+          {#if isSending}
+            <LoaderCircleIcon class="size-4 animate-spin" aria-hidden="true" />
+            Sending...
+          {:else}
+            Send
+          {/if}
         </Button>
       </div>
       {#if errorMessage}

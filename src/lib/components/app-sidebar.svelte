@@ -22,7 +22,7 @@
 			{
 				name: "STAT",
 				logo: GalleryVerticalEndIcon,
-				plan: "York Council",
+				plan: "AI Search",
 			},
 			{
 				name: "QRIOS",
@@ -37,14 +37,14 @@
 		],
 		navMain: [
 			{
-				title: "York Chat",
-				url: "/york",
+				title: "AI Search",
+				url: "/barnsley",
 				icon: MessageCircleIcon,
 				isActive: true,
 				items: [
 					{
 						title: "Assistant",
-						url: "/york",
+						url: "/barnsley",
 					},
 				],
 			},
