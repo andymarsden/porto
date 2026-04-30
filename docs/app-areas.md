@@ -6,43 +6,34 @@ This project is split into three isolated areas, each at its own URL prefix and 
 
 | Area | URL prefix | Purpose |
 |------|-----------|---------|
-| web | `/web/*` | Public-facing website |
+| web | `/` | Public-facing website |
 | app | `/app/*` | Authenticated/sidebar-driven application |
 | blank | `/blank/*` | Minimal canvas with no shell UI |
 
-Visiting `/` redirects automatically to `/web`.
+Visiting `/` renders the web area directly with no redirect.
 
 ## File structure
 
 ```
 src/routes/
-  +layout.svelte              ← Root layout: global CSS and favicon only
-  +page.server.js             ← Redirects / → /web
-
-  (web)/web/
+  (web)/
     +layout.svelte            ← Web shell layout
-    +page.svelte              ← Landing page at /web
+    +page.svelte              ← Landing page at /
 
   (app)/app/
     +layout.svelte            ← Sidebar shell layout
     +page.svelte              ← Landing page at /app
-    sidebar-07/
-      +page.svelte            ← Feature page at /app/sidebar-07
 
   (blank)/blank/
     +layout.svelte            ← Bare layout (children only)
     +page.svelte              ← Landing page at /blank
 ```
 
-The `(web)`, `(app)`, and `(blank)` folder names use SvelteKit route group syntax. The parentheses prevent the group name appearing in the URL, while the inner `web/`, `app/`, `blank/` folders create the actual URL prefix.
+The `(web)`, `(app)`, and `(blank)` folder names use SvelteKit route group syntax. The parentheses prevent the group name appearing in the URL. The web area's `+page.svelte` sits directly inside `(web)/` so it resolves to `/`. The `app/` and `blank/` inner folders create their respective URL prefixes.
 
 ## How each layout works
 
-### Root layout (`src/routes/+layout.svelte`)
-
-Imports global CSS (`layout.css`) and sets the favicon. Renders children without any wrapper UI. Every area inherits this passthrough.
-
-### Web layout (`(web)/web/+layout.svelte`)
+### Web layout (`(web)/+layout.svelte`)
 
 Wraps pages in a `min-h-screen flex flex-col` container. Add a nav bar, header, or footer here for the public-facing site.
 
@@ -57,7 +48,7 @@ Renders children directly with no wrapper. Inherits global CSS (fonts, colour va
 ## How to add a new page to an existing area
 
 1. Create a `.svelte` file at the appropriate path:
-   - Web: `src/routes/(web)/web/your-page/+page.svelte`
+   - Web: `src/routes/(web)/your-page/+page.svelte`
    - App: `src/routes/(app)/app/your-page/+page.svelte`
    - Blank: `src/routes/(blank)/blank/your-page/+page.svelte`
 2. The page automatically inherits its area layout. No further wiring needed.
