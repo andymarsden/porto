@@ -58,23 +58,10 @@ Renders children directly with no wrapper. Inherits global CSS (fonts, colour va
 1. Create a route group folder under `src/routes/`, for example `(admin)/admin/`.
 2. Add a `+layout.svelte` inside it with the shell UI for that area.
 3. Add a `+page.svelte` as the area landing page.
-4. Optionally update `src/routes/+page.server.js` if you want `/` to redirect to the new area instead of `/web`.
-
-## How to change which area / redirects to
-
-Edit `src/routes/+page.server.js`:
-
-```js
-import { redirect } from '@sveltejs/kit';
-
-export function load() {
-  redirect(307, '/web'); // change /web to your target
-}
-```
 
 ## How to change the web layout shell
 
-Edit `src/routes/(web)/web/+layout.svelte`. Add a nav bar, footer, or any wrapper HTML there.
+Edit `src/routes/(web)/+layout.svelte`. Add a nav bar, footer, or any wrapper HTML there.
 
 ## How to change the app sidebar
 
