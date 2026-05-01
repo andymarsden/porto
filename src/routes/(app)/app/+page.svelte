@@ -1,28 +1,35 @@
 <script>
-	import * as Breadcrumb from "$lib/components/ui/breadcrumb/index.js";
-	import { Separator } from "$lib/components/ui/separator/index.js";
-	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+	import AppHeader from "$lib/components/app-header.svelte";
+
+	let { data } = $props();
+	let draftFavoriteTeam = $state(data.favoriteTeam);
+
+	$effect(() => {
+		draftFavoriteTeam = data.favoriteTeam;
+	});
 </script>
 
-<header
-	class="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
->
-	<div class="flex items-center gap-2 px-4">
-		<Sidebar.Trigger class="-ms-1" />
-		<Separator orientation="vertical" class="me-2 data-[orientation=vertical]:h-4" />
-		<Breadcrumb.Root>
-			<Breadcrumb.List>
-				<Breadcrumb.Item class="hidden md:block">
-					<Breadcrumb.Link href="##">Build Your Application</Breadcrumb.Link>
-				</Breadcrumb.Item>
-				<Breadcrumb.Separator class="hidden md:block" />
-				<Breadcrumb.Item>
-					<Breadcrumb.Page>Data Fetching</Breadcrumb.Page>
-				</Breadcrumb.Item>
-			</Breadcrumb.List>
-		</Breadcrumb.Root>
-	</div>
-</header>
+<div class="px-4 pt-4">
+	<h2 class="text-xl font-semibold">{data.favoriteTeam}</h2>
+
+	<form method="POST" class="mt-3 flex max-w-md gap-2">
+		<input
+			name="favoriteTeam"
+			type="text"
+			bind:value={draftFavoriteTeam}
+			class="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+		/>
+		<button
+			type="submit"
+			class="bg-primary text-primary-foreground h-9 rounded-md px-4 text-sm font-medium"
+		>Save</button>
+	</form>
+</div>
+
+<AppHeader
+	crumbs={[{ label: "Build Your Application", href: "##" }]}
+	currentPage="Data Fetching"
+/>
 <!-- <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
 	<div class="grid auto-rows-min gap-4 md:grid-cols-3">
 		<div class="bg-muted/50 aspect-video rounded-xl"></div>

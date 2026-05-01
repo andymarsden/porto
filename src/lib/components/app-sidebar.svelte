@@ -36,18 +36,18 @@
 		],
 		navMain: [
 			{
-				title: "Playground",
+				title: "Sandbox",
 				url: "#",
 				icon: SquareTerminalIcon,
 				isActive: true,
 				items: [
 					{
-						title: "History",
-						url: "#",
+						title: "Home",
+						url: "../sandbox",
 					},
 					{
-						title: "Starred",
-						url: "#",
+						title: "Testing",
+						url: "../sandbox/testing",
 					},
 					{
 						title: "Settings",
@@ -152,6 +152,12 @@
 		collapsible = "icon",
 		...restProps
 	} = $props();
+
+	import SunIcon from "@lucide/svelte/icons/sun";
+	import MoonIcon from "@lucide/svelte/icons/moon";
+
+	import { toggleMode } from "mode-watcher";
+	import { Button } from "$lib/components/ui/button/index.js";
 </script>
 
 <Sidebar.Root bind:ref {collapsible} {...restProps}>
@@ -161,6 +167,16 @@
 	<Sidebar.Content>
 		<NavMain items={data.navMain} />
 		<NavProjects projects={data.projects} />
+
+		<Button onclick={toggleMode} variant="outline" size="icon">
+			<SunIcon
+				class="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 !transition-all dark:scale-0 dark:-rotate-90"
+			/>
+			<MoonIcon
+				class="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 !transition-all dark:scale-100 dark:rotate-0"
+			/>
+			<span class="sr-only">Toggle theme</span>
+		</Button>
 	</Sidebar.Content>
 	<Sidebar.Footer>
 		<NavUser user={data.user} />

@@ -5,6 +5,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import AppSidebar from '$lib/components/app-sidebar.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+import { ModeWatcher } from "mode-watcher";
 
 	let { children } = $props();
 </script>
@@ -13,7 +14,7 @@
 	<link rel="icon" href={favicon} />
 	<title>STAT</title>
 </svelte:head>
-
+<ModeWatcher />
 <Sidebar.Provider>
 	<AppSidebar />
 	<Sidebar.Inset>
