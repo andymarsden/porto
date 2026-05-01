@@ -17,7 +17,10 @@
 
 <div class="flex flex-1 flex-col gap-4 px-4 py-10">
     <div class="bg-muted/50 mx-auto h-24 w-full max-w-3xl rounded-xl">
-         <Button variant="outline">Button</Button>
+        <div class="flex h-full items-center justify-between px-4">
+            <p class="text-sm font-medium">Try the new sandbox chat interface.</p>
+            <Button variant="outline" href="/app/sandbox/chat">Open Chat</Button>
+        </div>
     </div>
     <!-- <div class="flex w-full max-w-md flex-col gap-6"></div> -->
     <div class="mx-auto h-full w-full max-w-md rounded-xl">
