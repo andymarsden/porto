@@ -1,5 +1,6 @@
 <script>
     import AppHeader from "$lib/components/app-header.svelte";
+    import { buildMessages } from "$lib/services/chat.js";
     import { Button } from "$lib/components/ui/button/index.js";
     import { Input } from "$lib/components/ui/input/index.js";
 
@@ -9,17 +10,12 @@
     function sendMessage(event) {
         event.preventDefault();
 
-        const text = inputText.trim();
-        if (!text) {
+        const nextMessages = buildMessages(messages, inputText);
+        if (nextMessages.length === messages.length) {
             return;
         }
 
-        messages = [
-            ...messages,
-            { role: "user", content: text },
-            { role: "assistant", content: `Echo: ${text}` }
-        ];
-
+        messages = nextMessages;
         inputText = "";
     }
 </script>
