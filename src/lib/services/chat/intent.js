@@ -1,11 +1,7 @@
-import { containsSlashN } from "$lib/services/string-check.js";
+import { containsSlashN, containsSlashT } from "$lib/services/chat/string-check.js";
 
 function normalizeIntentInput(input) {
     return typeof input === "string" ? input : String(input ?? "");
-}
-
-function containsSlashT(input) {
-    return input.includes("/t");
 }
 
 const intentHandlers = [
@@ -29,7 +25,7 @@ const intentHandlers = [
     }
 ];
 
-export function resolveAssistantReply(input) {
+export function resolveAssistantReply(input, _context = {}) {
     const text = normalizeIntentInput(input);
 
     for (const handler of intentHandlers) {

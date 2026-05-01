@@ -21,7 +21,7 @@
 			{
 				name: "STAT",
 				logo: GalleryVerticalEndIcon,
-				plan: "York Council",
+				plan: "internal",
 			},
 			{
 				name: "QRIOS",
@@ -50,8 +50,8 @@
 						url: "../sandbox/testing",
 					},
 					{
-						title: "Settings",
-						url: "#",
+						title: "Chat",
+						url: "../sandbox/chat",
 					},
 				],
 			},

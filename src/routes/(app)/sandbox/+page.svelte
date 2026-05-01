@@ -3,7 +3,7 @@
     import * as Item from "$lib/components/ui/item/index.js";
     import { Button } from "$lib/components/ui/button/index.js";
     import { Input } from "$lib/components/ui/input/index.js";
-    import { containsSlashN } from "$lib/services/string-check.js";
+    import { containsSlashN } from "$lib/services/chat/string-check.js";
 
     let inputText = $state("");
     let showNote = $state(false);
