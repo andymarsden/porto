@@ -1,7 +1,6 @@
 <svelte:options runes={true} />
 
 <script>
-	import '../layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import AppSidebar from '$lib/components/app-sidebar.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
