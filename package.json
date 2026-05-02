@@ -6,6 +6,8 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
+		"test": "vitest",
+		"test:run": "vitest run",
 		"preview": "vite preview",
 		"docs:index": "node scripts/generate-docs-index.mjs",
 		"hooks:install": "git config core.hooksPath .githooks",
@@ -29,7 +31,8 @@
 		"tailwind-variants": "^3.2.2",
 		"tailwindcss": "^4.2.2",
 		"tw-animate-css": "^1.4.0",
-		"vite": "^8.0.7"
+		"vite": "^8.0.7",
+		"vitest": "^4.1.5"
 	},
 	"dependencies": {
 		"mode-watcher": "^1.1.0",

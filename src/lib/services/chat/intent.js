@@ -1,5 +1,6 @@
 import { containsSlashN, containsSlashT } from "$lib/services/chat/string-check.js";
-import { createNote, extractNoteTextFromCommand } from "$lib/services/chat/note.js";
+import { CHAT_INTENTS } from "$lib/services/chat/constants.js";
+import { extractNoteTextFromCommand } from "$lib/services/chat/note.js";
 
 function normalizeIntentInput(input) {
     return typeof input === "string" ? input : String(input ?? "");
@@ -7,9 +8,17 @@ function normalizeIntentInput(input) {
 
 //containsSlashR
 
+function createReply(intent, content, meta = null) {
+    return {
+        intent,
+        content,
+        meta
+    };
+}
+
 const intentHandlers = [
     {
-        id: "create-note",
+        id: CHAT_INTENTS.CREATE_NOTE,
         command: "/n",
         usage: "/n ",
         label: "Create Note",
@@ -21,22 +30,22 @@ const intentHandlers = [
             const noteText = extractNoteTextFromCommand(text);
 
             if (!noteText) {
-                return {
-                    content: "Please provide note text after /n, create note, or new note",
-                    pendingAction: null
-                };
+                return createReply(
+                    CHAT_INTENTS.CREATE_NOTE,
+                    "Please provide note text after /n, create note, or new note",
+                    { noteText: "", requiresTitleReview: false }
+                );
             }
 
-            const note = createNote(noteText);
-
-            return {
-                content: "Note created. Would you like to add a title? Reply with your title (or skip / no).",
-                pendingAction: { type: "note-title-prompt", noteId: note.id }
-            };
+            return createReply(
+                CHAT_INTENTS.CREATE_NOTE,
+                "Review the suggested title below before saving your note.",
+                { noteText, requiresTitleReview: true }
+            );
         }
     },
     {
-        id: "timestamp",
+        id: CHAT_INTENTS.TIMESTAMP,
         command: "/t",
         usage: "/t",
         label: "Timestamp",
@@ -45,7 +54,7 @@ const intentHandlers = [
             return containsSlashT(text);
         },
         buildReply() {
-            return `Timestamp: ${new Date().toISOString()}`;
+            return createReply(CHAT_INTENTS.TIMESTAMP, `Timestamp: ${new Date().toISOString()}`);
         }
     }
 ];
@@ -55,19 +64,11 @@ export function resolveAssistantReply(input, _context = {}) {
 
     for (const handler of intentHandlers) {
         if (handler.match(text)) {
-            const reply = handler.buildReply(text);
-            const content = typeof reply === "string" ? reply : reply.content;
-            const pendingAction = typeof reply === "object" ? (reply.pendingAction ?? null) : null;
-
-            return { intent: handler.id, content, pendingAction };
+            return handler.buildReply(text);
         }
     }
 
-    return {
-        intent: "echo",
-        content: `Echo: ${text}`,
-        pendingAction: null
-    };
+    return createReply(CHAT_INTENTS.ECHO, `Echo: ${text}`);
 }
 
 export function getAvailableCommands() {
