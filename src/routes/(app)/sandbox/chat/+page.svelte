@@ -5,7 +5,8 @@
     import { getAvailableCommands } from "$lib/services/chat/intent.js";
     import { getNotes } from "$lib/services/chat/note.js";
     import { Button } from "$lib/components/ui/button/index.js";
-    import { Input } from "$lib/components/ui/input/index.js";
+    import { Textarea } from "$lib/components/ui/textarea/index.js";
+    import { toast } from "svelte-sonner";
 
     const slashCommands = getAvailableCommands();
 
@@ -94,51 +95,84 @@
     }
 
     function handleInputKeydown(event) {
-        if (conversation.pendingAction || !slashMenuOpen) {
-            return;
-        }
-
-        if (event.key === "ArrowDown") {
-            event.preventDefault();
-            moveCommandSelection(1);
-            return;
-        }
-
-        if (event.key === "ArrowUp") {
-            event.preventDefault();
-            moveCommandSelection(-1);
-            return;
-        }
-
-        if (event.key === "Enter") {
-            if (filteredCommands.length === 0) {
+        if (!conversation.pendingAction && slashMenuOpen) {
+            if (event.key === "ArrowDown") {
+                event.preventDefault();
+                moveCommandSelection(1);
                 return;
             }
 
-            event.preventDefault();
-            selectCommand(filteredCommands[activeCommandIndex]);
-            return;
+            if (event.key === "ArrowUp") {
+                event.preventDefault();
+                moveCommandSelection(-1);
+                return;
+            }
+
+            if (event.key === "Enter") {
+                if (filteredCommands.length === 0) {
+                    return;
+                }
+
+                event.preventDefault();
+                selectCommand(filteredCommands[activeCommandIndex]);
+                return;
+            }
+
+            if (event.key === "Escape") {
+                event.preventDefault();
+                slashMenuOpen = false;
+                return;
+            }
         }
 
-        if (event.key === "Escape") {
+        if (event.key === "Enter" && !event.shiftKey && !event.isComposing) {
             event.preventDefault();
-            slashMenuOpen = false;
+            submitCurrentMessage();
         }
     }
 
-    function sendMessage(event) {
-        event.preventDefault();
-
+    function submitCurrentMessage() {
         const nextConversation = buildConversationUpdate(conversation, inputText);
         if (nextConversation.messages.length === conversation.messages.length) {
             return;
         }
 
+        const assistantMessage = nextConversation.messages.at(-1);
+        const noteCreatedSuccessfully =
+            assistantMessage?.intent === "create-note" &&
+            nextConversation.pendingAction?.type === "note-title-prompt";
+
         conversation = nextConversation;
+
+        if (noteCreatedSuccessfully) {
+            toast.success("Note created successfully");
+        }
+
         inputText = "";
         slashMenuOpen = false;
         activeCommandIndex = 0;
     }
+
+    function sendMessage(event) {
+        event.preventDefault();
+        submitCurrentMessage();
+    }
+
+    function resizeInput() {
+        if (!inputRef) {
+            return;
+        }
+
+        const maxHeight = 192;
+        inputRef.style.height = "auto";
+        inputRef.style.height = `${Math.min(inputRef.scrollHeight, maxHeight)}px`;
+        inputRef.style.overflowY = inputRef.scrollHeight > maxHeight ? "auto" : "hidden";
+    }
+
+    $effect(() => {
+        inputText;
+        resizeInput();
+    });
 </script>
 
 <AppHeader
@@ -216,11 +250,12 @@
 
         <form class="mt-4 flex shrink-0 gap-2 border-t pt-3" onsubmit={sendMessage}>
             <div class="relative flex-1">
-                <Input
+                <Textarea
                     bind:ref={inputRef}
-                    type="text"
-                    placeholder="Type your message (try / for commands)"
+                    rows="1"
+                    placeholder="Type a message (Enter to send, Shift+Enter for newline, / for commands)"
                     bind:value={inputText}
+                    class="max-h-48 min-h-9 resize-none"
                     onfocus={() => {
                         inputHasFocus = true;
                     }}

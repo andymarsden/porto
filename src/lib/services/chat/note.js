@@ -1,9 +1,20 @@
 const notes = [];
+const NOTE_COMMAND_PREFIX = /^\s*(\/n|create note|new note)\s*/i;
+
+function deriveDefaultTitle(content) {
+    const value = typeof content === "string" ? content.trim() : String(content ?? "").trim();
+
+    if (!value) {
+        return "Untitled note";
+    }
+
+    return value.slice(0, 20);
+}
 
 export function createNote(content) {
     const note = {
         id: crypto.randomUUID(),
-        title: null,
+        title: deriveDefaultTitle(content),
         content,
         createdAt: new Date().toISOString()
     };
@@ -31,7 +42,7 @@ export function getNotes() {
 
 export function extractNoteTextFromCommand(input) {
     const value = typeof input === "string" ? input : String(input ?? "");
-    return value.replace(/\/n/g, "").trim();
+    return value.replace(NOTE_COMMAND_PREFIX, "").trim();
 }
 
 export function serializeNotes() {

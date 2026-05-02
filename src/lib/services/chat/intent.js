@@ -22,7 +22,7 @@ const intentHandlers = [
 
             if (!noteText) {
                 return {
-                    content: "Please provide note text after /n",
+                    content: "Please provide note text after /n, create note, or new note",
                     pendingAction: null
                 };
             }

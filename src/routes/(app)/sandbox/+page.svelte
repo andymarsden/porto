@@ -19,7 +19,7 @@
     <div class="bg-muted/50 mx-auto h-24 w-full max-w-3xl rounded-xl">
         <div class="flex h-full items-center justify-between px-4">
             <p class="text-sm font-medium">Try the new sandbox chat interface.</p>
-            <Button variant="outline" href="/app/sandbox/chat">Open Chat</Button>
+            <Button variant="outline" href="/sandbox/chat">Open Chat</Button>
         </div>
     </div>
     <!-- <div class="flex w-full max-w-md flex-col gap-6"></div> -->

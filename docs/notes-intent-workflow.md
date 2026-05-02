@@ -2,29 +2,39 @@
 
 ## Overview
 
-The `/n` command in the chat interface allows users to create notes inline. Note creation is handled by the chat intent layer and delegates to a dedicated note service. The optional title follow-up flow is now implemented using conversation pending actions.
+Notes can be created inline from chat. Note creation is handled by the chat intent layer and delegates to a dedicated note service. The flow supports optional title follow-up via conversation pending actions.
 
 ## Command Syntax
 
+Accepted note creation prefixes:
+
 ```
 /n <note text>
+create note <note text>
+new note <note text>
 ```
 
 Examples:
 
 ```
 /n buy milk
-/n follow up with the team on Friday
+create note follow up with the team on Friday
+new note call supplier tomorrow
 ```
 
-The `/n` token can appear anywhere in the message, but the convention is to lead with it.
+Important behavior:
+
+- The command must be at the beginning of the message.
+- Embedded text does not trigger note creation (for example, `please create note buy milk` does not match).
 
 ## Current Behavior
 
 | Input | Outcome |
 |---|---|
-| `/n buy milk` | Note created with content "buy milk" and no title; assistant asks whether to add a title |
-| `/n` alone | No note created; assistant replies "Please provide note text after /n" |
+| `/n buy milk` | Note created; assistant asks whether to add a title |
+| `create note buy milk` | Note created; assistant asks whether to add a title |
+| `new note buy milk` | Note created; assistant asks whether to add a title |
+| `/n` alone (or `create note` / `new note` alone) | No note created; assistant asks for note text |
 | `<title text>` after note prompt | Title is added to the most recently prompted note and assistant confirms |
 | `/skip` after note prompt | Title step is skipped and assistant confirms |
 | Any other text | Normal intent resolution (e.g. `/t` for timestamp, or echo fallback) |
@@ -36,11 +46,16 @@ Notes are managed in `src/lib/services/chat/note.js`.
 ```js
 {
   id: string,        // generated with crypto.randomUUID()
-  title: string|null,
-  content: string,   // extracted note body text after /n is stripped
+  title: string,
+  content: string,
   createdAt: string  // ISO timestamp
 }
 ```
+
+Title behavior:
+
+- On creation, a default title is always generated from the first 20 characters of note content.
+- If the user provides a title in the follow-up step, it replaces the default title.
 
 Notes are stored in an in-memory array. They reset on page refresh.
 
@@ -51,7 +66,7 @@ Notes are stored in an in-memory array. They reset on page refresh.
 - `createNote(content)` — creates and stores a note; returns the note object.
 - `addTitleToNote(noteId, title)` — sets a title on an existing note; returns updated note or null.
 - `getNotes()` — returns a shallow copy of the current notes array.
-- `extractNoteTextFromCommand(input)` — strips `/n` tokens from the input string and trims the result.
+- `extractNoteTextFromCommand(input)` — removes a leading note command prefix (`/n`, `create note`, `new note`) and trims the result.
 - `serializeNotes()` — serializes current notes array to JSON.
 - `loadNotes(rawJson)` — replaces in-memory notes from JSON when valid.
 
@@ -65,6 +80,11 @@ The `create-note` handler in `src/lib/services/chat/intent.js` owns the note com
 4. If body is non-empty: call `createNote(noteText)` and return both:
 - assistant content asking for optional title
 - `pendingAction: { type: "note-title-prompt", noteId }`
+
+Matcher details:
+
+- The note matcher is prefix-only and case-insensitive.
+- It accepts `/n`, `create note`, and `new note` at the start of input.
 
 `resolveAssistantReply(...)` returns a normalized object for all intents:
 
@@ -98,7 +118,7 @@ Add a `pendingAction` field to the conversation model:
 ### Suggested flow
 
 1. User sends `/n buy milk`
-2. Note is created; reply is "Note created. Would you like to add a title? Reply with your title or /skip"
+2. Note is created; reply is "Note created. Would you like to add a title? Reply with your title (or skip / no)."
 3. `pendingAction` is set to `{ type: "note-title-prompt", noteId: "<id>" }` on the conversation
 4. On next user message, the chat service checks `conversation.pendingAction` before running intent resolution
 5. If pending action is active: pass the user's text as the title for that note (or skip if `/skip`)
@@ -114,6 +134,13 @@ Current implementation lives in `src/lib/services/chat/chat.js`:
   - title application via `addTitleToNote(...)`
   - `/skip` command
   - assistant confirmation messages
+
+## UI Feedback
+
+When note creation succeeds, chat shows a success toast notification via Sonner.
+
+- Trigger condition: the latest assistant intent is `create-note` and `pendingAction.type` is `note-title-prompt`.
+- This avoids showing a success toast when the command is incomplete (for example `/n` with no note text).
 
 ## Adding Persistence
 
