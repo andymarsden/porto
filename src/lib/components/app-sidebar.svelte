@@ -53,6 +53,10 @@
 						title: "Chat",
 						url: "../sandbox/chat",
 					},
+										{
+						title: "Notes",
+						url: "../sandbox/notes",
+					},
 				],
 			},
 			{

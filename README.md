@@ -12,6 +12,7 @@ The list below is auto-generated from markdown files in [docs](docs/). Run `npm 
 - [App Areas (Web, App, Blank)](docs/app-areas.md)
 - [Chat Conversation Model (MVP)](docs/chat-conversation-model.md)
 - [Documentation Workflow](docs/documentation-workflow.md)
+- [Notes Intent Workflow](docs/notes-intent-workflow.md)
 - [Robots.txt Maintenance](docs/robots.md)
 - [Theming](docs/theming.md)
 <!-- docs-index:end -->

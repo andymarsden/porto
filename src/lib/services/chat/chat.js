@@ -1,4 +1,5 @@
 import { resolveAssistantReply } from "$lib/services/chat/intent.js";
+import { addTitleToNote } from "$lib/services/chat/note.js";
 
 function normalizeInput(input) {
     return typeof input === "string" ? input.trim() : String(input ?? "").trim();
@@ -28,8 +29,34 @@ export function createConversation() {
         id: crypto.randomUUID(),
         createdAt: timestamp,
         updatedAt: timestamp,
-        messages: []
+        messages: [],
+        pendingAction: null
     };
+}
+
+function resolvePendingAction(currentConversation, text) {
+    const { pendingAction } = currentConversation;
+
+    if (!pendingAction) {
+        return null;
+    }
+
+    if (pendingAction.type === "note-title-prompt") {
+        const normalizedResponse = text.trim().toLowerCase();
+        const skipped = normalizedResponse === "/skip" || normalizedResponse === "skip" || normalizedResponse === "no";
+        const replyContent = skipped ? "Title skipped." : `Title "${text.trim()}" added to note.`;
+
+        if (!skipped) {
+            addTitleToNote(pendingAction.noteId, text);
+        }
+
+        return {
+            assistantContent: replyContent,
+            intent: "note-title-prompt"
+        };
+    }
+
+    return null;
 }
 
 export function buildConversationUpdate(currentConversation, rawInput) {
@@ -39,14 +66,29 @@ export function buildConversationUpdate(currentConversation, rawInput) {
         return currentConversation;
     }
 
-    const assistantReply = resolveAssistantReply(text, { conversation: currentConversation });
+    const pending = resolvePendingAction(currentConversation, text);
+
+    let assistantContent;
+    let intent;
+    let nextPendingAction = null;
+
+    if (pending) {
+        assistantContent = pending.assistantContent;
+        intent = pending.intent;
+    } else {
+        const assistantReply = resolveAssistantReply(text, { conversation: currentConversation });
+        assistantContent = assistantReply.content;
+        intent = assistantReply.intent;
+        nextPendingAction = assistantReply.pendingAction ?? null;
+    }
 
     const nextConversation = {
         ...currentConversation,
+        pendingAction: nextPendingAction,
         messages: [
             ...currentConversation.messages,
             createMessage("user", text),
-            createMessage("assistant", assistantReply.content, assistantReply.intent)
+            createMessage("assistant", assistantContent, intent)
         ]
     };
 
