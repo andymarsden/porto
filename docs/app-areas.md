@@ -1,13 +1,13 @@
 # App Areas (Web, App, Blank)
 
-This project is split into three isolated areas, each at its own URL prefix and with its own independent layout.
+This project is split into three route groups with independent layouts. Some routes have explicit URL prefixes (for example, `/app` and `/blank`), while others are grouped only for layout and do not include the group name in the URL.
 
 ## URL structure
 
 | Area | URL prefix | Purpose |
 |------|-----------|---------|
 | web | `/` | Public-facing website |
-| app | `/app/*` | Authenticated/sidebar-driven application |
+| app | Mixed (`/app`, `/sandbox/*`, `/cheese`) | Sidebar-driven application area |
 | blank | `/blank/*` | Minimal canvas with no shell UI |
 
 Visiting `/` renders the web area directly with no redirect.
@@ -20,16 +20,23 @@ src/routes/
     +layout.svelte            ← Web shell layout
     +page.svelte              ← Landing page at /
 
-  (app)/app/
-    +layout.svelte            ← Sidebar shell layout
-    +page.svelte              ← Landing page at /app
+  (app)/
+    +layout.svelte            ← Sidebar shell layout for all routes in (app)
+    app/
+      +page.svelte            ← Landing page at /app
+    sandbox/
+      +page.svelte            ← Landing page at /sandbox
+      chat/+page.svelte       ← /sandbox/chat
+      notes/+page.svelte      ← /sandbox/notes
+    cheese/
+      +page.svelte            ← /cheese
 
   (blank)/blank/
     +layout.svelte            ← Bare layout (children only)
     +page.svelte              ← Landing page at /blank
 ```
 
-The `(web)`, `(app)`, and `(blank)` folder names use SvelteKit route group syntax. The parentheses prevent the group name appearing in the URL. The web area's `+page.svelte` sits directly inside `(web)/` so it resolves to `/`. The `app/` and `blank/` inner folders create their respective URL prefixes.
+The `(web)`, `(app)`, and `(blank)` folder names use SvelteKit route group syntax. Parenthesized group names do not appear in URLs. URL segments come from non-parenthesized folders only (for example `app/` creates `/app`, and `sandbox/notes` creates `/sandbox/notes`).
 
 ## How each layout works
 
@@ -37,9 +44,9 @@ The `(web)`, `(app)`, and `(blank)` folder names use SvelteKit route group synta
 
 Wraps pages in a `min-h-screen flex flex-col` container. Add a nav bar, header, or footer here for the public-facing site.
 
-### App layout (`(app)/app/+layout.svelte`)
+### App layout (`(app)/+layout.svelte`)
 
-Wraps pages in the sidebar shell using `Sidebar.Provider` and `AppSidebar`. Every page under `/app/*` automatically gets the sidebar. Add a top nav or breadcrumb here if needed across all app pages, or add it to individual pages if it varies per page.
+Wraps pages in the sidebar shell using `Sidebar.Provider` and `AppSidebar`. Every page in the `(app)` route group (for example `/app`, `/sandbox/*`, `/cheese`) gets the sidebar automatically.
 
 ### Blank layout (`(blank)/blank/+layout.svelte`)
 
@@ -49,7 +56,8 @@ Renders children directly with no wrapper. Inherits global CSS (fonts, colour va
 
 1. Create a `.svelte` file at the appropriate path:
    - Web: `src/routes/(web)/your-page/+page.svelte`
-   - App: `src/routes/(app)/app/your-page/+page.svelte`
+  - App (under `/app`): `src/routes/(app)/app/your-page/+page.svelte`
+  - App (under `/sandbox`): `src/routes/(app)/sandbox/your-page/+page.svelte`
    - Blank: `src/routes/(blank)/blank/your-page/+page.svelte`
 2. The page automatically inherits its area layout. No further wiring needed.
 
@@ -65,7 +73,7 @@ Edit `src/routes/(web)/+layout.svelte`. Add a nav bar, footer, or any wrapper HT
 
 ## How to change the app sidebar
 
-The sidebar content lives in `src/lib/components/app-sidebar.svelte`. The layout at `src/routes/(app)/app/+layout.svelte` imports and renders it. Edit the layout to change the shell structure (e.g. add a top bar above the sidebar), or edit `app-sidebar.svelte` to change the sidebar contents.
+The sidebar content lives in `src/lib/components/app-sidebar.svelte`. The layout at `src/routes/(app)/+layout.svelte` imports and renders it. Edit the layout to change the shell structure (for example add a top bar above the sidebar), or edit `app-sidebar.svelte` to change the sidebar contents.
 
 ## How to share a component across all areas
 
