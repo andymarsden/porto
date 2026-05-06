@@ -30,7 +30,7 @@ When you submit `/n some text`, the assistant responds with:
 
 ## Extending commands
 
-Edit the command service at `src/lib/services/commands.js`.
+Edit the command service at `src/lib/services/commands.js` and intent service at `src/lib/services/intents.js`.
 
 - Add a command entry to `COMMANDS`.
 - Add intent behavior in `handleIntent`.

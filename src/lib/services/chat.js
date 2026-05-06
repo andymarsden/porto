@@ -1,4 +1,4 @@
-import { resolveIntentResponse } from '$lib/services/commands.js';
+import { resolveIntentResponse } from '$lib/services/intents.js';
 
 const MAX_TEXTAREA_HEIGHT = 220;
 

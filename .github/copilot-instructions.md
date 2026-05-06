@@ -6,3 +6,4 @@
 - Use SvelteKit conventions for routing, loading data, and server actions.
 - Keep components small and focused.
 - Avoid adding dependencies unless necessary.
+- Add simple comments to variables and functions that are not self-explanatory.
