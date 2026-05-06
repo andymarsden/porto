@@ -1,6 +1,12 @@
 import { resolveIntentResponse } from '$lib/services/intents.js';
 
 const MAX_TEXTAREA_HEIGHT = 220;
+const STARTUP_MESSAGES = [
+	'Welcome back. Ask a question or use a slash command to get started.',
+	'Chat is ready. Try a prompt or type / to see available commands.',
+	'Hello. I can respond to messages or route slash commands through mock intents.',
+	'Start anywhere. You can send a message or open the command list with /.'
+];
 
 function generateId() {
 	if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -17,6 +23,11 @@ function createMessage(role, content) {
 		content,
 		createdAt: new Date().toISOString()
 	};
+}
+
+function getStartupMessage() {
+	const index = Math.floor(Math.random() * STARTUP_MESSAGES.length);
+	return createMessage('assistant', STARTUP_MESSAGES[index]);
 }
 
 function formatTimestamp(createdAt) {
@@ -64,6 +75,7 @@ async function requestAssistantResponse(userText) {
 
 export {
 	MAX_TEXTAREA_HEIGHT,
+	getStartupMessage,
 	addUserAndThinkingMessages,
 	formatTimestamp,
 	replaceMessageContent,

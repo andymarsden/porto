@@ -6,6 +6,7 @@
 		MAX_TEXTAREA_HEIGHT,
 		addUserAndThinkingMessages,
 		formatTimestamp,
+		getStartupMessage,
 		replaceMessageContent,
 		requestAssistantResponse,
 	} from "$lib/services/chat.js";
@@ -122,6 +123,10 @@
 
 	// Ensures the initial render starts at the latest message position.
 	onMount(async () => {
+		if (messages.length === 0) {
+			messages = [getStartupMessage()];
+		}
+
 		autoResizeTextarea();
 		await scrollToBottom();
 	});
@@ -137,12 +142,6 @@
 	<section class="relative flex min-h-0 flex-1 flex-col" aria-label="Conversation">
 		<div bind:this={messageListRef} class="min-h-0 flex-1 overflow-y-auto" aria-live="polite">
 			<div class="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-8 pb-28 md:px-6 md:pb-36">
-				{#if messages.length === 0}
-					<p class="text-muted-foreground text-sm">
-						Start the conversation by typing a message below.
-					</p>
-				{/if}
-
 				{#each messages as message (message.id)}
 					{#if message.role === "user"}
 						<article class="flex justify-end">
