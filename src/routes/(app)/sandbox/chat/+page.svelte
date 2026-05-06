@@ -2,47 +2,22 @@
 	import { onMount, tick } from "svelte";
 	import { Button } from "$lib/components/ui/button/index.js";
 	import { Textarea } from "$lib/components/ui/textarea/index.js";
-import AppHeader from "$lib/components/app-header.svelte";
+	import {
+		MAX_TEXTAREA_HEIGHT,
+		addUserAndThinkingMessages,
+		formatTimestamp,
+		replaceMessageContent,
+		requestAssistantResponse,
+	} from "$lib/services/chat.js";
+	import AppHeader from "$lib/components/app-header.svelte";
+    
 	let messages = $state([]); // Stores the full chat history shown in the message list.
 	let draft = $state(""); // Holds the current textarea text before sending.
 	let isLoading = $state(false); // Tracks whether the assistant mock response is in progress.
-	const MAX_TEXTAREA_HEIGHT = 220; // Caps textarea growth before enabling internal scrolling.
 
 	let messageListRef = $state(null); // Reference to the scrollable message container element.
 	let messageEndRef = $state(null); // Reference to an anchor element at the end of the message list.
 	let textareaRef = $state(null); // Reference to the composer textarea for focus management.
-
-	// Creates a unique id for each chat message.
-	function generateId() {
-		if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-			return crypto.randomUUID();
-		}
-
-		return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-	}
-
-	// Builds a standardized message object used by the chat UI.
-	function createMessage(role, content) {
-		return {
-			id: generateId(),
-			role,
-			content,
-			createdAt: new Date().toISOString(),
-		};
-	}
-
-	// Formats ISO timestamps into short readable times for message metadata.
-	function formatTimestamp(createdAt) {
-		return new Date(createdAt).toLocaleTimeString([], {
-			hour: "numeric",
-			minute: "2-digit",
-		});
-	}
-
-	// Returns a temporary assistant reply used before API integration.
-	function buildMockResponse(userText) {
-		return `Mock assistant response: I received your message, "${userText}". Replace this with a real API call when backend integration is ready.`;
-	}
 
 	// Grows the textarea with content until a max height, then allows internal scrolling.
 	function autoResizeTextarea() {
@@ -79,10 +54,8 @@ import AppHeader from "$lib/components/app-header.svelte";
 		const content = draft.trim(); // Snapshot of the message text for this send action.
 		if (!content) return;
 
-		const userMessage = createMessage("user", content); // Outgoing user message object.
-		const thinkingMessage = createMessage("assistant", "Thinking..."); // Placeholder assistant message while waiting.
-
-		messages = [...messages, userMessage, thinkingMessage];
+		const { nextMessages, thinkingMessage } = addUserAndThinkingMessages(messages, content);
+		messages = nextMessages;
 		draft = "";
 		isLoading = true;
 
@@ -93,28 +66,14 @@ import AppHeader from "$lib/components/app-header.svelte";
 			// 1) Send `content` to your API/OpenAI endpoint.
 			// 2) Read the assistant text from the API response.
 			// 3) Replace `assistantContent` with that real response text.
-			await new Promise((resolve) => setTimeout(resolve, 900));
-			const assistantContent = buildMockResponse(content); // Mocked assistant text returned after the delay.
-
-			messages = messages.map((message) => {
-				if (message.id !== thinkingMessage.id) return message;
-
-				return {
-					...message,
-					content: assistantContent,
-					createdAt: new Date().toISOString(),
-				};
-			});
+			const assistantContent = await requestAssistantResponse(content);
+			messages = replaceMessageContent(messages, thinkingMessage.id, assistantContent);
 		} catch {
-			messages = messages.map((message) => {
-				if (message.id !== thinkingMessage.id) return message;
-
-				return {
-					...message,
-					content: "Sorry, something went wrong while generating the response.",
-					createdAt: new Date().toISOString(),
-				};
-			});
+			messages = replaceMessageContent(
+				messages,
+				thinkingMessage.id,
+				"Sorry, something went wrong while generating the response.",
+			);
 		} finally {
 			isLoading = false;
 			await scrollToBottom();
