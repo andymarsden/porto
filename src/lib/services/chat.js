@@ -2,6 +2,7 @@ import { resolveIntentResponse } from '$lib/services/intents.js';
 
 const MAX_TEXTAREA_HEIGHT = 220;
 const STARTUP_MESSAGES = [
+    'Hi Andy,\nWhat do you want to do today....',
 	'Welcome back. Ask a question or use a slash command to get started.',
 	'Chat is ready. Try a prompt or type / to see available commands.',
 	'Hello. I can respond to messages or route slash commands through mock intents.',
