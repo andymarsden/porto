@@ -2,7 +2,7 @@
 	import { onMount, tick } from "svelte";
 	import { Button } from "$lib/components/ui/button/index.js";
 	import { Textarea } from "$lib/components/ui/textarea/index.js";
-
+import AppHeader from "$lib/components/app-header.svelte";
 	let messages = $state([]); // Stores the full chat history shown in the message list.
 	let draft = $state(""); // Holds the current textarea text before sending.
 	let isLoading = $state(false); // Tracks whether the assistant mock response is in progress.
@@ -153,7 +153,13 @@
 		await scrollToBottom();
 	});
 </script>
-
+<AppHeader
+    crumbs={[
+        { label: "Admin", href: "/app" },
+        { label: "Sandbox", href: "/app/sandbox" }
+    ]}
+    currentPage="Chat"
+/>
 <main class="bg-background flex h-dvh min-h-0 flex-1 flex-col" aria-label="Chat page">
 	<section class="relative flex min-h-0 flex-1 flex-col" aria-label="Conversation">
 		<div bind:this={messageListRef} class="min-h-0 flex-1 overflow-y-auto" aria-live="polite">
