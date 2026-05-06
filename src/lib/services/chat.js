@@ -1,3 +1,5 @@
+import { resolveIntentResponse } from '$lib/services/commands.js';
+
 const MAX_TEXTAREA_HEIGHT = 220;
 
 function generateId() {
@@ -51,6 +53,11 @@ function replaceMessageContent(messages, messageId, content) {
 }
 
 async function requestAssistantResponse(userText) {
+	const intentResult = await resolveIntentResponse(userText);
+	if (intentResult.matched) {
+		return intentResult.response;
+	}
+
 	await new Promise((resolve) => setTimeout(resolve, 900));
 	return buildMockResponse(userText);
 }
