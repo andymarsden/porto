@@ -4,6 +4,7 @@
 	import { Textarea } from "$lib/components/ui/textarea/index.js";
 	import {
 		MAX_TEXTAREA_HEIGHT,
+		createConversation,
 		addUserAndThinkingMessages,
 		formatTimestamp,
 		getStartupMessage,
@@ -13,6 +14,7 @@
 	import { getCommandSuggestions } from "$lib/services/commands.js";
 	import AppHeader from "$lib/components/app-header.svelte";
     
+	let conversationId = $state(null); // Unique ID for the current chat session, reset on each page load.
 	let messages = $state([]); // Stores the full chat history shown in the message list.
 	let draft = $state(""); // Holds the current textarea text before sending.
 	let isLoading = $state(false); // Tracks whether the assistant mock response is in progress.
@@ -69,7 +71,7 @@
 			// 1) Send `content` to your API/OpenAI endpoint.
 			// 2) Read the assistant text from the API response.
 			// 3) Replace `assistantContent` with that real response text.
-			const assistantContent = await requestAssistantResponse(content);
+			const assistantContent = await requestAssistantResponse(content, conversationId);
 			messages = replaceMessageContent(messages, thinkingMessage.id, assistantContent);
 		} catch {
 			messages = replaceMessageContent(
@@ -123,6 +125,8 @@
 
 	// Ensures the initial render starts at the latest message position.
 	onMount(async () => {
+		conversationId = createConversation().id;
+
 		if (messages.length === 0) {
 			messages = [getStartupMessage()];
 		}

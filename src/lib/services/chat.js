@@ -26,6 +26,14 @@ function createMessage(role, content) {
 	};
 }
 
+// Creates a new conversation. In the future this will be persisted and retrievable by ID.
+function createConversation() {
+	return {
+		id: generateId(),
+		createdAt: new Date().toISOString()
+	};
+}
+
 function getStartupMessage() {
 	const index = Math.floor(Math.random() * STARTUP_MESSAGES.length);
 	return createMessage('assistant', STARTUP_MESSAGES[index]);
@@ -38,8 +46,9 @@ function formatTimestamp(createdAt) {
 	});
 }
 
-function buildMockResponse(userText) {
-	return `Mock assistant response: I received your message, "${userText}". Replace this with a real API call when backend integration is ready.`;
+// conversationId will be forwarded to the real API so the server can maintain context.
+function buildMockResponse(userText, conversationId) {
+	return `Mock assistant response (conversation: ${conversationId}): I received your message, "${userText}". Replace this with a real API call when backend integration is ready.`;
 }
 
 function addUserAndThinkingMessages(messages, content) {
@@ -64,18 +73,19 @@ function replaceMessageContent(messages, messageId, content) {
 	});
 }
 
-async function requestAssistantResponse(userText) {
+async function requestAssistantResponse(userText, conversationId) {
 	const intentResult = await resolveIntentResponse(userText);
 	if (intentResult.matched) {
 		return intentResult.response;
 	}
 
 	await new Promise((resolve) => setTimeout(resolve, 900));
-	return buildMockResponse(userText);
+	return buildMockResponse(userText, conversationId);
 }
 
 export {
 	MAX_TEXTAREA_HEIGHT,
+	createConversation,
 	getStartupMessage,
 	addUserAndThinkingMessages,
 	formatTimestamp,
