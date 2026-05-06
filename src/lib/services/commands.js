@@ -27,6 +27,9 @@ const COMMANDS = [
 	}
 ];
 
+// Parses slash command input into a normalized command name and argument string.
+// It trims whitespace, requires a leading "/", lowercases the command token,
+// and preserves the rest of the text as a single args value.
 function parseSlashCommand(input) {
 	const text = input.trim();
 	if (!text.startsWith("/")) return null;
@@ -46,6 +49,8 @@ function parseSlashCommand(input) {
 	};
 }
 
+// Expands one command into suggestion entries for the primary slash and aliases.
+// Aliases reuse the same metadata so the UI can surface /db and /debug uniformly.
 function toSuggestionEntries(command) {
 	const aliases = Array.isArray(command.aliases) ? command.aliases : [];
 	return [
@@ -58,6 +63,9 @@ function toSuggestionEntries(command) {
 	];
 }
 
+// Builds the command suggestion list for the composer.
+// If only "/" is typed, it returns all commands plus alias entries.
+// If partial text is present, it filters by command name prefix.
 function getCommandSuggestions(input) {
 	const parsed = parseSlashCommand(input);
 	if (!parsed) return [];
@@ -70,6 +78,9 @@ function getCommandSuggestions(input) {
 	return suggestions.filter((command) => command.name.startsWith(parsed.name));
 }
 
+// Resolves submitted text to a canonical command definition and parsed args.
+// Matching is case-insensitive (from parseSlashCommand) and checks both
+// the command's primary name and any configured alias names.
 function findCommand(input) {
 	const parsed = parseSlashCommand(input);
 	if (!parsed || !parsed.name) return null;

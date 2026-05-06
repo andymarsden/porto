@@ -19,7 +19,7 @@
 	let draft = $state(""); // Holds the current textarea text before sending.
 	let isLoading = $state(false); // Tracks whether the assistant mock response is in progress.
 	let isDebug = $state(false); // Enables debug-only UI details for the current chat session.
-	let commandSuggestions = $state([]);
+	let commandSuggestions = $state([]); // List of command suggestions based on the current draft content.
 
 	let messageListRef = $state(null); // Reference to the scrollable message container element.
 	let messageEndRef = $state(null); // Reference to an anchor element at the end of the message list.
