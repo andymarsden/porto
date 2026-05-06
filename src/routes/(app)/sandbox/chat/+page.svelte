@@ -8,9 +8,11 @@
 	let messages = $state([]); // Stores the full chat history shown in the message list.
 	let draft = $state(""); // Holds the current textarea text before sending.
 	let isLoading = $state(false); // Tracks whether the assistant mock response is in progress.
+	const MAX_TEXTAREA_HEIGHT = 220; // Caps textarea growth before enabling internal scrolling.
 
-	let messageListRef; // Reference to the scrollable message container element.
-	let textareaRef; // Reference to the composer textarea for focus management.
+	let messageListRef = $state(null); // Reference to the scrollable message container element.
+	let messageEndRef = $state(null); // Reference to an anchor element at the end of the message list.
+	let textareaRef = $state(null); // Reference to the composer textarea for focus management.
 
 	// Creates a unique id for each chat message.
 	function generateId() {
@@ -44,13 +46,32 @@
 		return `Mock assistant response: I received your message, "${userText}". Replace this with a real API call when backend integration is ready.`;
 	}
 
+	// Grows the textarea with content until a max height, then allows internal scrolling.
+	function autoResizeTextarea() {
+		if (!textareaRef) return;
+
+		textareaRef.style.height = "auto";
+		const nextHeight = Math.min(textareaRef.scrollHeight, MAX_TEXTAREA_HEIGHT);
+		textareaRef.style.height = `${nextHeight}px`;
+		textareaRef.style.overflowY = textareaRef.scrollHeight > MAX_TEXTAREA_HEIGHT ? "auto" : "hidden";
+	}
+
 	// Scrolls the conversation container to the most recent message.
 	async function scrollToBottom() {
 		await tick();
+		if (messageListRef) {
+			messageListRef.scrollTop = messageListRef.scrollHeight;
+		}
 
-		if (!messageListRef) return;
+		if (messageEndRef) {
+			messageEndRef.scrollIntoView({ block: "end" });
+		}
 
-		messageListRef.scrollTop = messageListRef.scrollHeight;
+		await new Promise((resolve) => requestAnimationFrame(resolve));
+
+		if (messageListRef) {
+			messageListRef.scrollTop = messageListRef.scrollHeight;
+		}
 	}
 
 	// Handles the full send lifecycle: user message, thinking state, and assistant response.
@@ -118,28 +139,27 @@
 		void sendMessage();
 	}
 
+	$effect(() => {
+		draft;
+		autoResizeTextarea();
+	});
+
+	$effect(() => {
+		messages;
+		void scrollToBottom();
+	});
+
 	// Ensures the initial render starts at the latest message position.
 	onMount(async () => {
+		autoResizeTextarea();
 		await scrollToBottom();
 	});
 </script>
 
-<main class="flex h-full min-h-0 flex-1 flex-col p-4" aria-label="Chat page">
-	<div class="mx-auto flex h-full w-full max-w-4xl min-h-0 flex-1 flex-col">
-		<header class="mb-4">
-			<h1 class="text-2xl font-semibold tracking-tight">Sandbox Chat</h1>
-			<p class="text-muted-foreground text-sm">MVP chat interface with local state and mock assistant replies.</p>
-		</header>
-
-		<section
-			class="bg-background flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border"
-			aria-label="Conversation"
-		>
-			<div
-				bind:this={messageListRef}
-				class="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4"
-				aria-live="polite"
-			>
+<main class="bg-background flex h-dvh min-h-0 flex-1 flex-col" aria-label="Chat page">
+	<section class="relative flex min-h-0 flex-1 flex-col" aria-label="Conversation">
+		<div bind:this={messageListRef} class="min-h-0 flex-1 overflow-y-auto" aria-live="polite">
+			<div class="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-8 pb-28 md:px-6 md:pb-36">
 				{#if messages.length === 0}
 					<p class="text-muted-foreground text-sm">
 						Start the conversation by typing a message below.
@@ -147,40 +167,55 @@
 				{/if}
 
 				{#each messages as message (message.id)}
-					<article class={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-						<div
-							class={`max-w-[85%] rounded-2xl px-4 py-3 text-sm shadow-sm ${message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}
-						>
+					{#if message.role === "user"}
+						<article class="flex justify-end">
+							<div class="bg-muted/70 text-foreground max-w-[85%] rounded-3xl border px-4 py-3 text-sm shadow-xs">
+								<p class="whitespace-pre-wrap wrap-break-word">{message.content}</p>
+								<p class="text-muted-foreground mt-2 text-[11px]">You • {formatTimestamp(message.createdAt)}</p>
+							</div>
+						</article>
+					{:else}
+						<article class="text-foreground text-[15px] leading-7">
+							<p class="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wide">Assistant</p>
 							<p class="whitespace-pre-wrap wrap-break-word">{message.content}</p>
-							<p class="mt-2 text-xs opacity-70">
-								{message.role === "user" ? "You" : "Assistant"} • {formatTimestamp(message.createdAt)}
-							</p>
-						</div>
-					</article>
+						</article>
+					{/if}
 				{/each}
+				<div bind:this={messageEndRef} aria-hidden="true"></div>
 			</div>
+		</div>
 
-			<form class="bg-background shrink-0 border-t p-3" onsubmit={handleSubmit}>
+		<div class="from-background via-background/95 to-background sticky bottom-0 border-t bg-linear-to-t px-3 pb-3 pt-4 md:px-6 md:pb-6">
+			<form class="mx-auto w-full max-w-3xl" onsubmit={handleSubmit}>
 				<label class="sr-only" for="chat-input">Message</label>
-				<Textarea
-					id="chat-input"
-					bind:this={textareaRef}
-					bind:value={draft}
-					onkeydown={handleComposerKeydown}
-					rows="3"
-					class="bg-background resize-y"
-					placeholder="Type your message..."
-					disabled={isLoading}
-					aria-describedby="composer-hint"
-				/>
-
-				<div class="mt-2 flex items-center justify-between gap-2">
-					<p id="composer-hint" class="text-muted-foreground text-xs">Enter sends. Shift + Enter adds a new line.</p>
-					<Button type="submit" disabled={isLoading || !draft.trim()} aria-busy={isLoading}>
-						{isLoading ? "Waiting..." : "Send"}
-					</Button>
+				<div class="bg-card ring-ring/30 focus-within:ring-ring rounded-3xl border p-2 shadow-sm transition-shadow focus-within:ring-2">
+					<div class="flex items-end gap-2">
+						<Textarea
+							id="chat-input"
+							bind:ref={textareaRef}
+							bind:value={draft}
+							onkeydown={handleComposerKeydown}
+							rows="1"
+							class="max-h-56 min-h-11 flex-1 resize-none border-0 bg-transparent px-3 py-2 shadow-none focus-visible:ring-0"
+							placeholder="Message assistant..."
+							disabled={isLoading}
+							aria-describedby="composer-hint"
+						/>
+						<Button
+							type="submit"
+							size="icon-sm"
+							class="rounded-full"
+							disabled={isLoading || !draft.trim()}
+							aria-busy={isLoading}
+						>
+							{isLoading ? "..." : "↑"}
+						</Button>
+					</div>
 				</div>
+				<p id="composer-hint" class="text-muted-foreground mt-2 px-2 text-xs">
+					Enter sends. Shift + Enter adds a new line.
+				</p>
 			</form>
-		</section>
-	</div>
+		</div>
+	</section>
 </main>
