@@ -5,6 +5,12 @@ const COMMANDS = [
 		description: "Kick off the mock N intent"
 	},
 	{
+		name: "db",
+		slash: "/db",
+		aliases: ["debug"],
+		description: "Toggle debug mode"
+	},
+	{
 		name: "help",
 		slash: "/help",
 		description: "Show available commands"
@@ -40,22 +46,39 @@ function parseSlashCommand(input) {
 	};
 }
 
+function toSuggestionEntries(command) {
+	const aliases = Array.isArray(command.aliases) ? command.aliases : [];
+	return [
+		command,
+		...aliases.map((alias) => ({
+			...command,
+			name: alias,
+			slash: `/${alias}`
+		}))
+	];
+}
+
 function getCommandSuggestions(input) {
 	const parsed = parseSlashCommand(input);
 	if (!parsed) return [];
+	const suggestions = COMMANDS.flatMap(toSuggestionEntries);
 
 	if (!parsed.name) {
-		return COMMANDS;
+		return suggestions;
 	}
 
-	return COMMANDS.filter((command) => command.name.startsWith(parsed.name));
+	return suggestions.filter((command) => command.name.startsWith(parsed.name));
 }
 
 function findCommand(input) {
 	const parsed = parseSlashCommand(input);
 	if (!parsed || !parsed.name) return null;
 
-	const command = COMMANDS.find((entry) => entry.name === parsed.name);
+	const command = COMMANDS.find((entry) => {
+		if (entry.name === parsed.name) return true;
+		const aliases = Array.isArray(entry.aliases) ? entry.aliases : [];
+		return aliases.includes(parsed.name);
+	});
 	if (!command) return null;
 
 	return {

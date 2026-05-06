@@ -11,13 +11,14 @@
 		replaceMessageContent,
 		requestAssistantResponse,
 	} from "$lib/services/chat.js";
-	import { getCommandSuggestions } from "$lib/services/commands.js";
+	import { findCommand, getCommandSuggestions } from "$lib/services/commands.js";
 	import AppHeader from "$lib/components/app-header.svelte";
     
 	let conversationId = $state(null); // Unique ID for the current chat session, reset on each page load.
 	let messages = $state([]); // Stores the full chat history shown in the message list.
 	let draft = $state(""); // Holds the current textarea text before sending.
 	let isLoading = $state(false); // Tracks whether the assistant mock response is in progress.
+	let isDebug = $state(false); // Enables debug-only UI details for the current chat session.
 	let commandSuggestions = $state([]);
 
 	let messageListRef = $state(null); // Reference to the scrollable message container element.
@@ -58,6 +59,32 @@
 
 		const content = draft.trim(); // Snapshot of the message text for this send action.
 		if (!content) return;
+//TODO This needs seperating out into seperate functionality
+		const commandMatch = findCommand(content);
+		if (commandMatch && commandMatch.command.name === "db") {
+			const now = new Date().toISOString();
+			const messageId =
+				typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+					? () => crypto.randomUUID()
+					: () => `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+			const createClientMessage = (role, text) => ({
+				id: messageId(),
+				role,
+				content: text,
+				createdAt: now,
+			});
+
+			isDebug = !isDebug;
+			messages = [
+				...messages,
+				createClientMessage("user", content),
+				createClientMessage("assistant", isDebug ? "Debugging turned on" : "Debugging turned off"),
+			];
+			draft = "";
+			await scrollToBottom();
+			textareaRef?.focus();
+			return;
+		}
 
 		const { nextMessages, thinkingMessage } = addUserAndThinkingMessages(messages, content);
 		messages = nextMessages;
@@ -146,6 +173,11 @@
 	<section class="relative flex min-h-0 flex-1 flex-col" aria-label="Conversation">
 		<div bind:this={messageListRef} class="min-h-0 flex-1 overflow-y-auto" aria-live="polite">
 			<div class="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-8 pb-28 md:px-6 md:pb-36">
+				{#if isDebug && conversationId}
+					<p class="text-muted-foreground bg-muted/40 rounded-lg border px-3 py-2 text-xs">
+						Conversation ID: {conversationId}
+					</p>
+				{/if}
 				{#each messages as message (message.id)}
 					{#if message.role === "user"}
 						<article class="flex justify-end">
