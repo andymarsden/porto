@@ -163,10 +163,10 @@
 		</div>
 
 		<div class="from-background via-background/95 to-background sticky bottom-0 border-t bg-linear-to-t px-3 pb-3 pt-4 md:px-6 md:pb-6">
-			<form class="mx-auto w-full max-w-3xl" onsubmit={handleSubmit}>
+			<form class="relative mx-auto w-full max-w-3xl" onsubmit={handleSubmit}>
 				<label class="sr-only" for="chat-input">Message</label>
 				{#if commandSuggestions.length > 0}
-					<div class="bg-popover mb-2 overflow-hidden rounded-xl border shadow-sm">
+					<div class="bg-popover absolute inset-x-0 bottom-full z-10 mb-2 overflow-hidden rounded-xl border shadow-sm">
 						<ul aria-label="Command suggestions" class="max-h-52 overflow-y-auto p-1">
 							{#each commandSuggestions as command (command.name)}
 								<li>
