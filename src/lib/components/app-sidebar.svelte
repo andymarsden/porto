@@ -21,7 +21,7 @@
 			{
 				name: "STAT",
 				logo: GalleryVerticalEndIcon,
-				plan: "York Council",
+				plan: "internal",
 			},
 			{
 				name: "QRIOS",
