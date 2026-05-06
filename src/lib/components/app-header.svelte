@@ -2,6 +2,7 @@
     import * as Breadcrumb from "$lib/components/ui/breadcrumb/index.js";
     import { Separator } from "$lib/components/ui/separator/index.js";
     import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+    import ThemeToggle from "$lib/components/theme-toggle.svelte";
 
     let {
         crumbs = [],
@@ -13,7 +14,7 @@
 <header
     class="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
 >
-    <div class="flex items-center gap-2 px-4">
+    <div class="flex min-w-0 items-center gap-2 px-4">
         {#if showSidebarTrigger}
             <Sidebar.Trigger class="-ms-1" />
         {/if}
@@ -35,6 +36,8 @@
                 </Breadcrumb.Item>
             </Breadcrumb.List>
         </Breadcrumb.Root>
-        
+    </div>
+    <div class="ms-auto pe-4">
+        <ThemeToggle />
     </div>
 </header>

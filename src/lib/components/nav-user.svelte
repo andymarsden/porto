@@ -1,4 +1,5 @@
 <script>
+	import { onMount } from "svelte";
 	import * as Avatar from "$lib/components/ui/avatar/index.js";
 	import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
 	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
@@ -8,10 +9,32 @@
 	import ChevronsUpDownIcon from "@lucide/svelte/icons/chevrons-up-down";
 	import CreditCardIcon from "@lucide/svelte/icons/credit-card";
 	import LogOutIcon from "@lucide/svelte/icons/log-out";
+	import MoonIcon from "@lucide/svelte/icons/moon";
 	import SparklesIcon from "@lucide/svelte/icons/sparkles";
+	import SunIcon from "@lucide/svelte/icons/sun";
+	import { THEMES, THEME_EVENT, getActiveTheme, toggleTheme } from "$lib/services/theme.js";
 
 	let { user } = $props();
 	const sidebar = useSidebar();
+	let theme = $state(THEMES.LIGHT);
+
+	function handleThemeToggle() {
+		theme = toggleTheme();
+	}
+
+	onMount(() => {
+		theme = getActiveTheme();
+
+		const handleThemeChange = (event) => {
+			theme = event.detail?.theme ?? getActiveTheme();
+		};
+
+		window.addEventListener(THEME_EVENT, handleThemeChange);
+
+		return () => {
+			window.removeEventListener(THEME_EVENT, handleThemeChange);
+		};
+	});
 </script>
 
 <Sidebar.Menu>
@@ -66,6 +89,15 @@
 					<DropdownMenu.Item>
 						<BadgeCheckIcon />
 						Account
+					</DropdownMenu.Item>
+					<DropdownMenu.Item onclick={handleThemeToggle}>
+						{#if theme === THEMES.DARK}
+							<SunIcon />
+							Switch to light mode
+						{:else}
+							<MoonIcon />
+							Switch to dark mode
+						{/if}
 					</DropdownMenu.Item>
 					<DropdownMenu.Item>
 						<CreditCardIcon />
