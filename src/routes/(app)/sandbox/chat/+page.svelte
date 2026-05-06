@@ -165,6 +165,24 @@
 		<div class="from-background via-background/95 to-background sticky bottom-0 border-t bg-linear-to-t px-3 pb-3 pt-4 md:px-6 md:pb-6">
 			<form class="mx-auto w-full max-w-3xl" onsubmit={handleSubmit}>
 				<label class="sr-only" for="chat-input">Message</label>
+				{#if commandSuggestions.length > 0}
+					<div class="bg-popover mb-2 overflow-hidden rounded-xl border shadow-sm">
+						<ul aria-label="Command suggestions" class="max-h-52 overflow-y-auto p-1">
+							{#each commandSuggestions as command (command.name)}
+								<li>
+									<button
+										type="button"
+										class="hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm focus-visible:ring-2 focus-visible:outline-none"
+										onclick={() => applyCommandSuggestion(command)}
+									>
+										<span class="font-medium">{command.slash}</span>
+										<span class="text-muted-foreground text-xs">{command.description}</span>
+									</button>
+								</li>
+							{/each}
+						</ul>
+					</div>
+				{/if}
 				<div class="bg-card ring-ring/30 focus-within:ring-ring rounded-3xl border p-2 shadow-sm transition-shadow focus-within:ring-2">
 					<div class="flex items-end gap-2">
 						<Textarea
@@ -192,24 +210,6 @@
 				<p id="composer-hint" class="text-muted-foreground mt-2 px-2 text-xs">
 					Enter sends. Shift + Enter adds a new line.
 				</p>
-				{#if commandSuggestions.length > 0}
-					<div class="bg-popover mt-2 overflow-hidden rounded-xl border shadow-sm">
-						<ul aria-label="Command suggestions" class="max-h-52 overflow-y-auto p-1">
-							{#each commandSuggestions as command (command.name)}
-								<li>
-									<button
-										type="button"
-										class="hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm focus-visible:ring-2 focus-visible:outline-none"
-										onclick={() => applyCommandSuggestion(command)}
-									>
-										<span class="font-medium">{command.slash}</span>
-										<span class="text-muted-foreground text-xs">{command.description}</span>
-									</button>
-								</li>
-							{/each}
-						</ul>
-					</div>
-				{/if}
 			</form>
 		</div>
 	</section>
