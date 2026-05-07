@@ -2,6 +2,7 @@
     import { onMount, tick } from "svelte";
     import AppHeader from "$lib/components/app-header.svelte";
     import { MessageAssistant,  MessageUser, } from "$lib/components/chat/index.js";
+    import { Badge } from "$lib/components/ui/badge/index.js";
     import { Button } from "$lib/components/ui/button/index.js";
     import { Textarea } from "$lib/components/ui/textarea/index.js";
     // import { MAX_TEXTAREA_HEIGHT, createMessage, formatTimestamp } from "$lib/services/chat.js";
@@ -185,6 +186,15 @@
 
 <main class="bg-background flex h-dvh min-h-0 flex-1 flex-col" aria-label="Chat page">
     <section class="relative flex min-h-0 flex-1 flex-col" aria-label="Conversation">
+        <Badge
+            variant="outline"
+            class="pointer-events-none absolute right-4 top-4 z-20 bg-blue-500 text-white dark:bg-blue-600 normal-case text-[12px] tracking-normal"
+        >
+            chat mode
+        </Badge>
+
+
+
         <div bind:this={messageListRef} class="min-h-0 flex-1 overflow-y-auto" aria-live="polite" >
             <div class="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-8 pb-28 md:px-6 md:pb-36" >
                 {#each messages as message (message.id)}
