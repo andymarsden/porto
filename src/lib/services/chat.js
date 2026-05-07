@@ -26,6 +26,60 @@ function createMessage(role, content) {
 	};
 }
 
+
+/**
+ * Resolves slash command input and returns structured command handling output.
+ * When handled is false, callers should continue the normal assistant fallback flow.
+ *
+ * @param {string} userText
+ * @param {{ isDebug?: boolean }} [state]
+ * @returns {Promise<ChatCommandResult>}
+ */
+async function handleCommand(userText, { isDebug = false } = {}) {
+	const startedAt = Date.now();
+	const intentResult = await resolveIntentResponse(userText);
+	//if intent is not matched
+	if (!intentResult.matched) {
+		return {
+			handled: false,
+			messages: [],
+			stateUpdates: {},
+			debugMeta: null
+		};
+	}
+
+	//if intent in debug command, toggle debug mode and return appropriate response
+	if (intentResult.command?.name === 'db') {
+		const nextIsDebug = !isDebug;
+		return {
+			handled: true,
+			messages: [
+				createMessage('user', userText),
+				createMessage('assistant', nextIsDebug ? 'Debugging turned on' : 'Debugging turned off')
+			],
+			stateUpdates: {
+				isDebug: nextIsDebug
+			},
+			debugMeta: {
+				commandName: 'db',
+				args: intentResult.args ?? '',
+				resolvedAtMs: Date.now() - startedAt
+			}
+		};
+	}
+
+	return {
+		handled: true,
+		messages: [createMessage('user', userText), createMessage('assistant', intentResult.response)],
+		stateUpdates: {},
+		debugMeta: {
+			commandName: intentResult.command?.name ?? '',
+			args: intentResult.args ?? '',
+			resolvedAtMs: Date.now() - startedAt
+		}
+	};
+}
+
 // Creates a new conversation. In the future this will be persisted and retrievable by ID.
 function createConversation() {
 	return {
@@ -74,11 +128,6 @@ function replaceMessageContent(messages, messageId, content) {
 }
 
 async function requestAssistantResponse(userText, conversationId) {
-	const intentResult = await resolveIntentResponse(userText);
-	if (intentResult.matched) {
-		return intentResult.response;
-	}
-
 	await new Promise((resolve) => setTimeout(resolve, 900));
 	return buildMockResponse(userText, conversationId);
 }
@@ -86,9 +135,11 @@ async function requestAssistantResponse(userText, conversationId) {
 export {
 	MAX_TEXTAREA_HEIGHT,
 	createConversation,
+	createMessage,
 	getStartupMessage,
 	addUserAndThinkingMessages,
 	formatTimestamp,
 	replaceMessageContent,
+	handleCommand,
 	requestAssistantResponse
 };

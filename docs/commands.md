@@ -11,8 +11,8 @@ The chat composer supports slash commands.
 
 There are two execution paths after submit:
 
-- Local UI command path for debug toggling (`/db`, `/debug`).
-- Intent service path for standard mock intent commands (`/n`, `/help`, `/status`, `/clear`).
+- Service command path in `src/lib/services/chat.js` via `handleCommand(...)`.
+- Fallback assistant path for non-command input in `requestAssistantResponse(...)`.
 
 ## Available commands
 
@@ -36,22 +36,25 @@ This means both `/db` and `/debug` match the same command and behavior.
 
 ## Debug mode behavior
 
-Debug toggling is handled directly in the chat page in `src/routes/(app)/sandbox/chat/+page.svelte`.
+Debug toggling is handled in `src/lib/services/chat.js` by `handleCommand(...)`.
 
-When the submitted input matches `db`:
+When the submitted input matches `db` (or alias `debug`):
 
-- The page flips local `isDebug` state.
-- It appends the user command as a user message.
-- It appends an assistant message with exact text:
+- The chat service returns a structured command result with `stateUpdates.isDebug`.
+- The page applies `stateUpdates` and appends returned `messages`.
+- The assistant confirmation text remains:
 	- `Debugging turned on`
 	- `Debugging turned off`
-- It does not call the assistant intent/fallback response pipeline for this command.
+
+The page does not contain command-specific branches anymore.
 
 When `isDebug` is true, the chat UI shows the current conversation id at the top of the message list.
 
 ## Mock intent behavior
 
-For intent-routed commands, the flow goes through `src/lib/services/intents.js`.
+For command responses (`/n`, `/help`, `/status`, `/clear`), `handleCommand(...)` calls `resolveIntentResponse(...)` in `src/lib/services/intents.js`.
+
+For non-command messages, the page continues to fallback flow and calls `requestAssistantResponse(...)`, which now returns only the generic mock assistant response.
 
 When you submit `/n`, the assistant responds with:
 
@@ -76,42 +79,36 @@ flowchart TD
 		A --> I{User submits Enter or Send}
 		I -->|If loading| J[Abort send]
 		I -->|If empty after trim| K[Abort send]
-		I -->|Valid content| L[findCommand(content)]
+		I -->|Valid content| L[handleCommand content and isDebug]
 
-		L --> M{Command is db?}
-		M -->|Yes| N[Toggle isDebug and append Debugging turned on or off]
+		L --> M{Handled?}
+		M -->|Yes| N[Append command messages and apply stateUpdates]
 		N --> O{isDebug true?}
 		O -->|Yes| P[Show Conversation ID banner]
 		O -->|No| Q[Hide Conversation ID banner]
 
 		M -->|No| R[addUserAndThinkingMessages]
 		R --> S[Append user message + Thinking... assistant placeholder]
-		S --> T[requestAssistantResponse(content)]
-
-		T --> U[resolveIntentResponse in intents service]
-		U --> V[findCommand via commands service]
-		V --> W{Recognized command?}
-		W -->|No| X[Fallback chat mock response after 900ms]
-		W -->|Yes| Y[handleIntent after 350ms]
-		Y --> Z{Intent name}
-		Z -->|n| AA[/n intent hit or with args]
-		Z -->|help| AB[List of available slash commands]
-		Z -->|status| AC[Mock status response]
-		Z -->|clear| AD[Mock clear response]
-
-		X --> AE[replaceMessageContent Thinking... with response]
-		AA --> AE
-		AB --> AE
-		AC --> AE
-		AD --> AE
-
-		AE --> AF[isLoading false + scrollToBottom + refocus textarea]
+		S --> T[requestAssistantResponse fallback mock response]
+		T --> U[replaceMessageContent Thinking... with response]
+		U --> AF[isLoading false + scrollToBottom + refocus textarea]
 
 		subgraph Error Path
 			T -->|exception| ERR[replace Thinking... with error message]
 			ERR --> AF
 		end
 ```
+
+## Command result contract
+
+`handleCommand(...)` returns a consistent object shape:
+
+- `handled` — boolean indicating whether the input was consumed as a command.
+- `messages` — array of message objects to append to the chat list.
+- `stateUpdates` — mutable state patches for the page (currently `isDebug`).
+- `debugMeta` — optional diagnostics (`commandName`, `args`, `resolvedAtMs`).
+
+When `handled` is `false`, the page continues the standard assistant fallback path.
 
 ## Extending commands
 
@@ -120,7 +117,7 @@ Edit the command service at `src/lib/services/commands.js` and intent service at
 - Add a command entry to `COMMANDS`.
 - Optionally add aliases with `aliases: ["alias-name"]`.
 - Add intent behavior in `handleIntent` for intent-routed commands.
-- If a command changes page-local state (like debug), handle it in `sendMessage` in `src/routes/(app)/sandbox/chat/+page.svelte`.
+- If a command changes page-local state (like debug), return it via `stateUpdates` in `handleCommand` in `src/lib/services/chat.js`.
 
 ## Troubleshooting
 
@@ -128,7 +125,7 @@ Edit the command service at `src/lib/services/commands.js` and intent service at
 
 - Confirm the command is resolvable by `findCommand(input)` in `src/lib/services/commands.js`.
 - If the command uses aliases, verify `aliases` is an array of lowercase names (without `/`).
-- Check whether the command should be handled locally in `sendMessage` or in `handleIntent`.
+- Check whether the command behavior belongs in `handleIntent` (response text) and whether it needs a `stateUpdates` patch in `handleCommand`.
 
 ### Command does not appear in suggestions
 
@@ -140,16 +137,16 @@ Edit the command service at `src/lib/services/commands.js` and intent service at
 
 - Ensure `COMMANDS` keeps `name: "db"` as the primary command.
 - Ensure `aliases: ["debug"]` is present on the same command object.
-- Ensure local debug handling checks `commandMatch.command.name === "db"` so both forms map to one branch.
+- Ensure `handleCommand` checks `intentResult.command?.name === "db"` so both forms map to one branch.
 
 ### Debug message appears but conversation id does not show
 
-- Confirm `isDebug` toggles in `sendMessage` when the debug command is submitted.
+- Confirm `stateUpdates.isDebug` is returned by `handleCommand` and applied in `sendMessage`.
 - Confirm `conversationId` is initialized in `onMount`.
 - Confirm the banner guard is `{#if isDebug && conversationId}` in the chat page template.
 
 ### Intent command returns generic mock response instead of intent response
 
-- Check `resolveIntentResponse(input)` in `src/lib/services/intents.js` to confirm command matching still succeeds.
+- Check `resolveIntentResponse(input)` in `src/lib/services/intents.js` to confirm command matching succeeds.
 - Verify `handleIntent(commandName, args)` returns a non-null string for the command.
-- If `handleIntent` returns `null`, the chat service falls back to the generic mock response path.
+- If command handling returns `handled: false`, the page continues fallback and calls `requestAssistantResponse(...)`.

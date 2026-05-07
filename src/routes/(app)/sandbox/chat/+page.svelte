@@ -9,10 +9,11 @@
 		addUserAndThinkingMessages,
 		formatTimestamp,
 		getStartupMessage,
+		handleCommand,
 		replaceMessageContent,
 		requestAssistantResponse,
 	} from "$lib/services/chat.js";
-	import { findCommand, getCommandSuggestions } from "$lib/services/commands.js";
+	import { getCommandSuggestions } from "$lib/services/commands.js";
 	import AppHeader from "$lib/components/app-header.svelte";
     
 	let conversationId = $state(null); // Unique ID for the current chat session, reset on each page load.
@@ -60,28 +61,19 @@
 
 		const content = draft.trim(); // Snapshot of the message text for this send action.
 		if (!content) return;
-		//TODO This needs seperating out into seperate functionality
-		const commandMatch = findCommand(content);
-		if (commandMatch && commandMatch.command.name === "db") {
-			const now = new Date().toISOString();
-			const messageId =
-				typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
-					? () => crypto.randomUUID()
-					: () => `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-			const createClientMessage = (role, text) => ({
-				id: messageId(),
-				role,
-				content: text,
-				createdAt: now,
-			});
 
-			isDebug = !isDebug;
-			messages = [
-				...messages,
-				createClientMessage("user", content),
-				createClientMessage("assistant", isDebug ? "Debugging turned on" : "Debugging turned off"),
-			];
+		isLoading = true;
+		const commandResult = await handleCommand(content, { isDebug });
+		if (commandResult.handled) {
+			if (commandResult.messages.length > 0) {
+				messages = [...messages, ...commandResult.messages];
+			}
+			if (typeof commandResult.stateUpdates.isDebug === "boolean") {
+				isDebug = commandResult.stateUpdates.isDebug;
+			}
+
 			draft = "";
+			isLoading = false;
 			await scrollToBottom();
 			textareaRef?.focus();
 			return;
@@ -90,7 +82,6 @@
 		const { nextMessages, thinkingMessage } = addUserAndThinkingMessages(messages, content);
 		messages = nextMessages;
 		draft = "";
-		isLoading = true;
 
 		await scrollToBottom();
 

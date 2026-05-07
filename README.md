@@ -10,6 +10,7 @@ The list below is auto-generated from markdown files in [docs](docs/). Run `npm 
 
 <!-- docs-index:start -->
 - [App Areas (Web, App, Blank)](docs/app-areas.md)
+- [Chat Command Flow](docs/chat-command-flow.md)
 - [Commands](docs/commands.md)
 - [Conversations](docs/conversations.md)
 - [Documentation Workflow](docs/documentation-workflow.md)
