@@ -121,36 +121,67 @@
         }
     }
     
+    //#region Mock response
+    // Returns a mock assistant payload for a given user message.
+    // Future: replace this with a real API call. The shape { text, options } is the
+    // contract — real responses can include or exclude `options` as needed.
+    function _mockResponse(userText) {
+        return {
+            text: `Mock response to: "${userText}"`,
+            // Remove or conditionally set `options` to control when buttons appear.
+            options: [
+                { id: "opt-1", label: "Tell me more", value: "Tell me more" },
+                { id: "opt-2", label: "Show examples", value: "Show examples" },
+                { id: "opt-3", label: "Clarify", value: "Clarify" },
+            ],
+        };
+    }
+    //#endregion
+
     //#region Send message logic
-    async function sendMessage() {
+    // Shared pipeline used by both typed sends and option-button clicks.
+    async function _sendUserMessage(content) {
         if (isLoading) return;
-
-        const content = draft.trim();
-        if (!content) return;
-
         isLoading = true;
+
         const thinkingMessage = _createMessage("assistant", "Thinking...");
         messages = [...messages, _createMessage("user", content), thinkingMessage];
-        draft = "";
 
         await scrollToBottom();
-
         await new Promise((resolve) => setTimeout(resolve, 900));
 
         // Future API integration point:
         // 1) Send `content` to your backend or model API.
-        // 2) Wait for the assistant payload.
-        // 3) Replace the thinking message with the returned assistant text.
+        // 2) Await the assistant payload ({ text, options }).
+        // 3) Replace the thinking message and attach options if present.
+        const response = _mockResponse(content);
+        await revealAssistantContent(thinkingMessage.id, response.text);
 
-
-        await revealAssistantContent(thinkingMessage.id, content);
+        // Attach options to the revealed assistant message, if the response includes any.
+        if (response.options?.length) {
+            messages = messages.map((m) =>
+                m.id === thinkingMessage.id ? { ...m, options: response.options } : m
+            );
+        }
 
         isLoading = false;
         await scrollToBottom();
         textareaRef?.focus();
     }
+
+    async function sendMessage() {
+        const content = draft.trim();
+        if (!content) return;
+        draft = "";
+        await _sendUserMessage(content);
+    }
+
+    // Called when the user clicks an in-chat option button.
+    function handleOptionSelect(value) {
+        void _sendUserMessage(value);
+    }
     //#endregion
-    
+
     function handleComposerKeydown(event) {
         if (event.key !== "Enter") return;
         if (event.shiftKey) return;
@@ -207,7 +238,7 @@
                     {#if message.role === "user"}
                         <MessageUser {message} {formatTimestamp} />
                     {:else}
-                        <MessageAssistant {message} />
+                        <MessageAssistant {message} onOptionSelect={handleOptionSelect} />
                     {/if}
                 {/each}
                 <div bind:this={messageEndRef} aria-hidden="true"></div>
