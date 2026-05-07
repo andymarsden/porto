@@ -27,14 +27,6 @@ function createMessage(role, content) {
 }
 
 
-/**
- * Resolves slash command input and returns structured command handling output.
- * When handled is false, callers should continue the normal assistant fallback flow.
- *
- * @param {string} userText
- * @param {{ isDebug?: boolean }} [state]
- * @returns {Promise<ChatCommandResult>}
- */
 async function handleCommand(userText, { isDebug = false } = {}) {
 	const startedAt = Date.now();
 	const intentResult = await resolveIntentResponse(userText);
