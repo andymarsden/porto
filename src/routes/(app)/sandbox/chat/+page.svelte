@@ -6,6 +6,7 @@
 	import {
 		MAX_TEXTAREA_HEIGHT,
 		createConversation,
+		createMessage,
 		addUserAndThinkingMessages,
 		formatTimestamp,
 		getStartupMessage,
@@ -13,6 +14,7 @@
 		replaceMessageContent,
 		requestAssistantResponse,
 	} from "$lib/services/chat.js";
+	import { buildNotePreview, createNote } from "$lib/services/notes.js";
 	import { getCommandSuggestions } from "$lib/services/commands.js";
 	import AppHeader from "$lib/components/app-header.svelte";
     
@@ -21,6 +23,7 @@
 	let draft = $state(""); // Holds the current textarea text before sending.
 	let isLoading = $state(false); // Tracks whether the assistant mock response is in progress.
 	let isDebug = $state(false); // Enables debug-only UI details for the current chat session.
+	let awaitingNoteContent = $state(false); // Tracks whether the next non-command message should be saved as note content.
 	let commandSuggestions = $state([]); // List of command suggestions based on the current draft content.
 
 	let messageListRef = $state(null); // Reference to the scrollable message container element.
@@ -63,6 +66,29 @@
 		if (!content) return;
 
 		isLoading = true;
+		if (awaitingNoteContent && !content.startsWith("/")) {
+			const note = createNote(content);
+			const assistantMessage = note
+				? `Note saved: "${buildNotePreview(note.content)}"`
+				: "Please send note content in your next message.";
+
+			messages = [
+				...messages,
+				createMessage("user", content),
+				createMessage("assistant", assistantMessage),
+			];
+			draft = "";
+			awaitingNoteContent = !note;
+			isLoading = false;
+			await scrollToBottom();
+			textareaRef?.focus();
+			return;
+		}
+
+		if (awaitingNoteContent && content.startsWith("/")) {
+			awaitingNoteContent = false;
+		}
+
 		const commandResult = await handleCommand(content, { isDebug });
 		if (commandResult.handled) {
 			if (commandResult.messages.length > 0) {
@@ -70,6 +96,9 @@
 			}
 			if (typeof commandResult.stateUpdates.isDebug === "boolean") {
 				isDebug = commandResult.stateUpdates.isDebug;
+			}
+			if (typeof commandResult.stateUpdates.awaitingNoteContent === "boolean") {
+				awaitingNoteContent = commandResult.stateUpdates.awaitingNoteContent;
 			}
 
 			draft = "";

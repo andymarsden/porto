@@ -2,7 +2,7 @@ const COMMANDS = [
 	{
 		name: "n",
 		slash: "/n",
-		description: "Kick off the mock N intent"
+		description: "Create a note from command text"
 	},
 	{
 		name: "db",

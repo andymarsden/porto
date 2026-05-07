@@ -1,14 +1,36 @@
 import { COMMANDS, findCommand } from '$lib/services/commands.js';
+import { buildNotePreview, createNote, getNotesCount } from '$lib/services/notes.js';
 
 async function handleIntent(commandName, args) {
 	await new Promise((resolve) => setTimeout(resolve, 350));
 
 	if (commandName === 'n') {
 		if (args) {
-			return `/n intent hit (${args})`;
+			const note = createNote(args);
+			if (!note) {
+				return {
+					response: 'Please send note content in your next message.',
+					stateUpdates: {
+						awaitingNoteContent: true
+					}
+				};
+			}
+
+			const preview = buildNotePreview(note.content);
+			return {
+				response: `Note saved: "${preview}"`,
+				stateUpdates: {
+					awaitingNoteContent: false
+				}
+			};
 		}
 
-		return '/n intent hit';
+		return {
+			response: 'Please send note content in your next message.',
+			stateUpdates: {
+				awaitingNoteContent: true
+			}
+		};
 	}
 
 	if (commandName === 'help') {
@@ -16,7 +38,7 @@ async function handleIntent(commandName, args) {
 	}
 
 	if (commandName === 'status') {
-		return 'Mock status: all systems nominal.';
+		return `Mock status: all systems nominal. Notes in memory: ${getNotesCount()}.`;
 	}
 
 	if (commandName === 'clear') {
@@ -43,11 +65,22 @@ async function resolveIntentResponse(input) {
 		};
 	}
 
+	if (typeof response === 'string') {
+		return {
+			matched: true,
+			response,
+			command: match.command,
+			args: match.args,
+			stateUpdates: {}
+		};
+	}
+
 	return {
 		matched: true,
-		response,
+		response: response.response,
 		command: match.command,
-		args: match.args
+		args: match.args,
+		stateUpdates: response.stateUpdates ?? {}
 	};
 }
 

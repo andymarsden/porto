@@ -63,7 +63,7 @@ async function handleCommand(userText, { isDebug = false } = {}) {
 	return {
 		handled: true,
 		messages: [createMessage('user', userText), createMessage('assistant', intentResult.response)],
-		stateUpdates: {},
+		stateUpdates: intentResult.stateUpdates ?? {},
 		debugMeta: {
 			commandName: intentResult.command?.name ?? '',
 			args: intentResult.args ?? '',

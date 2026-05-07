@@ -16,7 +16,7 @@ There are two execution paths after submit:
 
 ## Available commands
 
-- `/n` - Kick off the mock N intent.
+- `/n` - Create a note from command text, or enter capture mode when no text is provided.
 - `/db` - Toggle local debug mode on/off.
 - `/debug` - Alias for `/db`.
 - `/help` - Return a list of commands.
@@ -50,19 +50,24 @@ The page does not contain command-specific branches anymore.
 
 When `isDebug` is true, the chat UI shows the current conversation id at the top of the message list.
 
-## Mock intent behavior
+## Note command behavior
 
 For command responses (`/n`, `/help`, `/status`, `/clear`), `handleCommand(...)` calls `resolveIntentResponse(...)` in `src/lib/services/intents.js`.
 
 For non-command messages, the page continues to fallback flow and calls `requestAssistantResponse(...)`, which now returns only the generic mock assistant response.
 
-When you submit `/n`, the assistant responds with:
+When you submit `/n` with content (for example `/n buy milk`):
 
-- `/n intent hit`
+- The note is saved to in-memory note storage.
+- The assistant confirms with a preview, for example `Note saved: "buy milk"`.
 
-When you submit `/n some text`, the assistant responds with:
+When you submit `/n` with no content:
 
-- `/n intent hit (some text)`
+- The assistant asks for note content in your next message.
+- The next non-command message is saved as the note content.
+- If the next message is another slash command, pending note capture is canceled and the new command runs.
+
+See `docs/notes.md` for full details and extension guidance.
 
 ## End-to-end flow
 
@@ -105,7 +110,7 @@ flowchart TD
 
 - `handled` — boolean indicating whether the input was consumed as a command.
 - `messages` — array of message objects to append to the chat list.
-- `stateUpdates` — mutable state patches for the page (currently `isDebug`).
+- `stateUpdates` — mutable state patches for the page (currently `isDebug` and `awaitingNoteContent`).
 - `debugMeta` — optional diagnostics (`commandName`, `args`, `resolvedAtMs`).
 
 When `handled` is `false`, the page continues the standard assistant fallback path.
@@ -148,5 +153,5 @@ Edit the command service at `src/lib/services/commands.js` and intent service at
 ### Intent command returns generic mock response instead of intent response
 
 - Check `resolveIntentResponse(input)` in `src/lib/services/intents.js` to confirm command matching succeeds.
-- Verify `handleIntent(commandName, args)` returns a non-null string for the command.
+- Verify `handleIntent(commandName, args)` returns a non-null response payload for the command.
 - If command handling returns `handled: false`, the page continues fallback and calls `requestAssistantResponse(...)`.
