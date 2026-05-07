@@ -1,17 +1,11 @@
 <script>
     import { onMount, tick } from "svelte";
     import AppHeader from "$lib/components/app-header.svelte";
-    import {
-        MessageAssistant,
-        MessageUser,
-    } from "$lib/components/chat/index.js";
+    import { MessageAssistant,  MessageUser, } from "$lib/components/chat/index.js";
     import { Button } from "$lib/components/ui/button/index.js";
     import { Textarea } from "$lib/components/ui/textarea/index.js";
     // import { MAX_TEXTAREA_HEIGHT, createMessage, formatTimestamp } from "$lib/services/chat.js";
-    import {
-        MAX_TEXTAREA_HEIGHT,
-        formatTimestamp,
-    } from "$lib/services/chat.js";
+    import { MAX_TEXTAREA_HEIGHT,  formatTimestamp,} from "$lib/services/chat.js";
 
     let messages = $state([]);
     let draft = $state("");
@@ -19,6 +13,7 @@
     let messageListRef = $state(null);
     let messageEndRef = $state(null);
     let textareaRef = $state(null);
+
 
     function generateId() {
         if (
@@ -39,6 +34,7 @@
             createdAt: new Date().toISOString(),
         };
     }
+
 
 // Replaces a message, typically used to swap out a "thinking" placeholder with actual assistant content once it's received.
     function _replaceMessageContent(messageId, content) {
@@ -65,6 +61,44 @@
         textareaRef.style.overflowY =
             textareaRef.scrollHeight > MAX_TEXTAREA_HEIGHT ? "auto" : "hidden";
     }
+//#region Word chunking logic is a simple way to create a more dynamic "typing" effect as the assistant's response is revealed incrementally.
+    function wait(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    function chunkWords(fullText, minWords = 2, maxWords = 5) {
+        const words = fullText.split(" ").filter(Boolean);
+        const chunks = [];
+        let index = 0;
+
+        while (index < words.length) {
+            const size =
+                minWords + Math.floor(Math.random() * (maxWords - minWords + 1));
+            chunks.push(words.slice(index, index + size).join(" "));
+            index += size;
+        }
+
+        return chunks;
+    }
+
+    async function revealAssistantContent(messageId, fullText) {
+        if (!fullText.trim()) {
+            messages = _replaceMessageContent(messageId, fullText);
+            return;
+        }
+
+        const chunks = chunkWords(fullText);
+        let displayed = "";
+
+        for (const chunk of chunks) {
+            displayed = displayed ? `${displayed} ${chunk}` : chunk;
+            messages = _replaceMessageContent(messageId, displayed);
+            // Slightly randomized delay keeps the typing cadence from feeling too mechanical.
+            await wait(30 + Math.random() * 40);
+        }
+    }
+//#endregion
+    
 
     async function scrollToBottom() {
         await tick();
@@ -103,7 +137,9 @@
         // 1) Send `content` to your backend or model API.
         // 2) Wait for the assistant payload.
         // 3) Replace the thinking message with the returned assistant text.
-        messages = _replaceMessageContent(thinkingMessage.id, content);
+
+
+        await revealAssistantContent(thinkingMessage.id, content);
 
         isLoading = false;
         await scrollToBottom();
