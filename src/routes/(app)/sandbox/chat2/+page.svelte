@@ -9,48 +9,17 @@
     import { Textarea } from "$lib/components/ui/textarea/index.js";
     // import { MAX_TEXTAREA_HEIGHT, createMessage, formatTimestamp } from "$lib/services/chat.js";
     import { MAX_TEXTAREA_HEIGHT,  formatTimestamp,} from "$lib/services/chat.js";
-
+    import {
+        createMessage,
+        replaceMessageContent,
+        sendUserMessage,
+    } from "$lib/services/v2/chat_engine.js";
     let messages = $state([]);
     let draft = $state("");
     let isLoading = $state(false);
     let messageListRef = $state(null);
     let messageEndRef = $state(null);
     let textareaRef = $state(null);
-
-
-    function generateId() {
-        if (
-            typeof crypto !== "undefined" &&
-            typeof crypto.randomUUID === "function"
-        ) {
-            return crypto.randomUUID();
-        }
-
-        return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-    }
-
-    function _createMessage(role, content) {
-        return {
-            id: generateId(),
-            role,
-            content,
-            createdAt: new Date().toISOString(),
-        };
-    }
-
-
-// Replaces a message, typically used to swap out a "thinking" placeholder with actual assistant content once it's received.
-    function _replaceMessageContent(messageId, content) {
-        return messages.map((message) => {
-            if (message.id !== messageId) return message;
-
-            return {
-                ...message,
-                content,
-                createdAt: new Date().toISOString(),
-            };
-        });
-    }
 
     function autoResizeTextarea() {
         if (!textareaRef) return;
@@ -64,6 +33,7 @@
         textareaRef.style.overflowY =
             textareaRef.scrollHeight > MAX_TEXTAREA_HEIGHT ? "auto" : "hidden";
     }
+    
     //#region Word chunking logic
     function wait(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms));
@@ -85,17 +55,19 @@
     }
 
     async function revealAssistantContent(messageId, fullText) {
-        if (!fullText.trim()) {
-            messages = _replaceMessageContent(messageId, fullText);
+        const normalizedText = String(fullText ?? "");
+
+        if (!normalizedText.trim()) {
+            messages = replaceMessageContent(messages, messageId, normalizedText);
             return;
         }
 
-        const chunks = chunkWords(fullText);
+        const chunks = chunkWords(normalizedText);
         let displayed = "";
 
         for (const chunk of chunks) {
             displayed = displayed ? `${displayed} ${chunk}` : chunk;
-            messages = _replaceMessageContent(messageId, displayed);
+            messages = replaceMessageContent(messages, messageId, displayed);
             // Slightly randomized delay keeps the typing cadence from feeling too mechanical.
             await wait(30 + Math.random() * 40);
         }
@@ -121,64 +93,33 @@
         }
     }
     
-    //#region Mock response
-    // Returns a mock assistant payload for a given user message.
-    // Future: replace this with a real API call. The shape { text, options } is the
-    // contract — real responses can include or exclude `options` as needed.
-    function _mockResponse(userText) {
-        return {
-            text: `Mock response to: "${userText}"`,
-            // Remove or conditionally set `options` to control when buttons appear.
-            options: [
-                { id: "opt-1", label: "Tell me more", value: "Tell me more" },
-                { id: "opt-2", label: "Show examples", value: "Show examples" },
-                { id: "opt-3", label: "Clarify", value: "Clarify" },
-            ],
-        };
-    }
-    //#endregion
-
     //#region Send message logic
-    // Shared pipeline used by both typed sends and option-button clicks.
-    async function _sendUserMessage(content) {
-        if (isLoading) return;
-        isLoading = true;
-
-        const thinkingMessage = _createMessage("assistant", "Thinking...");
-        messages = [...messages, _createMessage("user", content), thinkingMessage];
-
-        await scrollToBottom();
-        await new Promise((resolve) => setTimeout(resolve, 900));
-
-        // Future API integration point:
-        // 1) Send `content` to your backend or model API.
-        // 2) Await the assistant payload ({ text, options }).
-        // 3) Replace the thinking message and attach options if present.
-        const response = _mockResponse(content);
-        await revealAssistantContent(thinkingMessage.id, response.text);
-
-        // Attach options to the revealed assistant message, if the response includes any.
-        if (response.options?.length) {
-            messages = messages.map((m) =>
-                m.id === thinkingMessage.id ? { ...m, options: response.options } : m
-            );
-        }
-
-        isLoading = false;
-        await scrollToBottom();
-        textareaRef?.focus();
+    // Wrapper keeps Svelte rune assignments local while delegating pipeline logic to chat_engine.
+    async function sendViaEngine(content) {
+        await sendUserMessage({
+            content: content,
+            isLoading: () => isLoading,
+            getMessages: () => messages,
+            setMessages: (nextMessages) => { messages = nextMessages; },
+            setIsLoading: (nextLoading) => { isLoading = nextLoading; },
+            createMessage,
+            scrollToBottom,
+            revealAssistantContent,
+            focusComposer: () => textareaRef?.focus(),
+        });
     }
 
+    
     async function sendMessage() {
         const content = draft.trim();
         if (!content) return;
         draft = "";
-        await _sendUserMessage(content);
+        await sendViaEngine(content);
     }
 
     // Called when the user clicks an in-chat option button.
     function handleOptionSelect(value) {
-        void _sendUserMessage(value);
+        void sendViaEngine(value);
     }
     //#endregion
 
@@ -225,7 +166,7 @@
 
         // messages-square
             variant="outline"
-            class="pointer-events-none absolute right-4 top-4 z-20 bg-blue-500 text-white dark:bg-blue-600 normal-case text-[12px] tracking-normal"
+            class="pointer-events-none absolute right-4 top-4 bg-blue-500 text-white dark:bg-blue-600 normal-case text-[12px] tracking-normal"
         >
             chat mode
         </Badge>
