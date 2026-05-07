@@ -1,9 +1,11 @@
 <script>
     import { onMount, tick } from "svelte";
     import AppHeader from "$lib/components/app-header.svelte";
+    import ChevronsUpDownIcon from "@lucide/svelte/icons/chevrons-up-down";
     import { MessageAssistant,  MessageUser, } from "$lib/components/chat/index.js";
     import { Badge } from "$lib/components/ui/badge/index.js";
     import { Button } from "$lib/components/ui/button/index.js";
+    import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
     import { Textarea } from "$lib/components/ui/textarea/index.js";
     // import { MAX_TEXTAREA_HEIGHT, createMessage, formatTimestamp } from "$lib/services/chat.js";
     import { MAX_TEXTAREA_HEIGHT,  formatTimestamp,} from "$lib/services/chat.js";
@@ -187,6 +189,8 @@
 <main class="bg-background flex h-dvh min-h-0 flex-1 flex-col" aria-label="Chat page">
     <section class="relative flex min-h-0 flex-1 flex-col" aria-label="Conversation">
         <Badge
+
+        // messages-square
             variant="outline"
             class="pointer-events-none absolute right-4 top-4 z-20 bg-blue-500 text-white dark:bg-blue-600 normal-case text-[12px] tracking-normal"
         >
@@ -224,6 +228,33 @@
                             placeholder="Type a message..."
                             aria-describedby="composer-hint"
                         />
+                        <DropdownMenu.Root>
+                            <DropdownMenu.Trigger>
+                                {#snippet child({ props })}
+                                    <Button
+                                        variant="ghost"
+                                        size="icon-sm"
+                                        class="rounded-full"
+                                        {...props}
+                                    >
+                                        <ChevronsUpDownIcon class="size-4" />
+                                        <span class="sr-only">Open composer menu</span>
+                                    </Button>
+                                {/snippet}
+                            </DropdownMenu.Trigger>
+                            <DropdownMenu.Content
+                                side="top"
+                                align="end"
+                                sideOffset={8}
+                                class="w-40 rounded-lg"
+                            >
+                                <!-- Future: convert these placeholders into mode names and set a chatMode state in onSelect. -->
+                                <!-- Future: bind the top-right badge label to chatMode so selecting an item updates it. -->
+                                <DropdownMenu.Item>Option 1</DropdownMenu.Item>
+                                <DropdownMenu.Item>Option 2</DropdownMenu.Item>
+                                <DropdownMenu.Item>Option 3</DropdownMenu.Item>
+                            </DropdownMenu.Content>
+                        </DropdownMenu.Root>
                         <Button type="submit" size="icon-sm" class="rounded-full" disabled={isLoading || !draft.trim()} >
                             {isLoading ? "..." : "↑"}
                         </Button>
