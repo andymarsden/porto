@@ -64,7 +64,7 @@
         textareaRef.style.overflowY =
             textareaRef.scrollHeight > MAX_TEXTAREA_HEIGHT ? "auto" : "hidden";
     }
-//#region Word chunking logic is a simple way to create a more dynamic "typing" effect as the assistant's response is revealed incrementally.
+    //#region Word chunking logic
     function wait(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
@@ -100,7 +100,7 @@
             await wait(30 + Math.random() * 40);
         }
     }
-//#endregion
+    //#endregion
     
 
     async function scrollToBottom() {
@@ -120,7 +120,8 @@
             messageListRef.scrollTop = messageListRef.scrollHeight;
         }
     }
-
+    
+    //#region Send message logic
     async function sendMessage() {
         if (isLoading) return;
 
@@ -148,7 +149,8 @@
         await scrollToBottom();
         textareaRef?.focus();
     }
-
+    //#endregion
+    
     function handleComposerKeydown(event) {
         if (event.key !== "Enter") return;
         if (event.shiftKey) return;
