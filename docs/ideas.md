@@ -1,2 +1,7 @@
 -[] pulsing 'thinking' icon
 -[] create intent flow in n8n then replace with function to save calls!
+
+
+### Notes
+
+chatv2 is a stable skeleton
