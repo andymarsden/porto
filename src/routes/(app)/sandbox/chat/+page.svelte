@@ -2,6 +2,7 @@
 	import { onMount, tick } from "svelte";
 	import { Button } from "$lib/components/ui/button/index.js";
 	import { Textarea } from "$lib/components/ui/textarea/index.js";
+	import { MessageAssistant, MessageUser } from "$lib/components/chat/index.js";
 	import {
 		MAX_TEXTAREA_HEIGHT,
 		createConversation,
@@ -180,17 +181,9 @@
 				{/if}
 				{#each messages as message (message.id)}
 					{#if message.role === "user"}
-						<article class="flex justify-end">
-							<div class="bg-muted/70 text-foreground max-w-[85%] rounded-3xl border px-4 py-3 text-sm shadow-xs">
-								<p class="whitespace-pre-wrap wrap-break-word">{message.content}</p>
-								<p class="text-muted-foreground mt-2 text-[11px]">You • {formatTimestamp(message.createdAt)}</p>
-							</div>
-						</article>
+						<MessageUser {message} {formatTimestamp} />
 					{:else}
-						<article class="text-foreground text-[15px] leading-7">
-							<p class="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wide">Assistant</p>
-							<p class="whitespace-pre-wrap wrap-break-word">{message.content}</p>
-						</article>
+						<MessageAssistant {message} />
 					{/if}
 				{/each}
 				<div bind:this={messageEndRef} aria-hidden="true"></div>
