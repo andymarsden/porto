@@ -43,7 +43,7 @@
 				items: [
 					{
 						title: "Chat",
-						url: "/sandbox/chat",
+						url: "sandbox/chat",
 					},
 					{
 						title: "Chat 2",
