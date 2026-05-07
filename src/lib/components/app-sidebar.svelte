@@ -42,6 +42,14 @@
 				isActive: true,
 				items: [
 					{
+						title: "Chat",
+						url: "/sandbox/chat",
+					},
+					{
+						title: "Chat 2",
+						url: "/sandbox/chat2",
+					},
+					{
 						title: "History",
 						url: "#",
 					},
