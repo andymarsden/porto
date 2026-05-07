@@ -12,7 +12,7 @@
 </script>
 
 <header
-    class="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
+    class="bg-background/95 sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 border-b backdrop-blur supports-backdrop-filter:bg-background/80 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12"
 >
     <div class="flex min-w-0 items-center gap-2 px-4">
         {#if showSidebarTrigger}

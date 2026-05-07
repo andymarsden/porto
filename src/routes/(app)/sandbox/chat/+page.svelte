@@ -59,7 +59,7 @@
 
 		const content = draft.trim(); // Snapshot of the message text for this send action.
 		if (!content) return;
-//TODO This needs seperating out into seperate functionality
+		//TODO This needs seperating out into seperate functionality
 		const commandMatch = findCommand(content);
 		if (commandMatch && commandMatch.command.name === "db") {
 			const now = new Date().toISOString();
