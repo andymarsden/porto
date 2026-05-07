@@ -6,15 +6,12 @@
 	import {
 		MAX_TEXTAREA_HEIGHT,
 		createConversation,
-		createMessage,
-		addUserAndThinkingMessages,
 		formatTimestamp,
 		getStartupMessage,
-		handleCommand,
+		resolveSubmission,
 		replaceMessageContent,
 		requestAssistantResponse,
 	} from "$lib/services/chat.js";
-	import { buildNotePreview, createNote } from "$lib/services/notes.js";
 	import { getCommandSuggestions } from "$lib/services/commands.js";
 	import AppHeader from "$lib/components/app-header.svelte";
     
@@ -66,51 +63,28 @@
 		if (!content) return;
 
 		isLoading = true;
-		if (awaitingNoteContent && !content.startsWith("/")) {
-			const note = createNote(content);
-			const assistantMessage = note
-				? `Note saved: "${buildNotePreview(note.content)}"`
-				: "Please send note content in your next message.";
+		const submission = await resolveSubmission(content, {
+			messages,
+			awaitingNoteContent,
+			isDebug,
+		});
 
-			messages = [
-				...messages,
-				createMessage("user", content),
-				createMessage("assistant", assistantMessage),
-			];
-			draft = "";
-			awaitingNoteContent = !note;
-			isLoading = false;
-			await scrollToBottom();
-			textareaRef?.focus();
-			return;
+		messages = submission.messages;
+		if (typeof submission.stateUpdates.isDebug === "boolean") {
+			isDebug = submission.stateUpdates.isDebug;
+		}
+		if (typeof submission.stateUpdates.awaitingNoteContent === "boolean") {
+			awaitingNoteContent = submission.stateUpdates.awaitingNoteContent;
 		}
 
-		if (awaitingNoteContent && content.startsWith("/")) {
-			awaitingNoteContent = false;
-		}
-
-		const commandResult = await handleCommand(content, { isDebug });
-		if (commandResult.handled) {
-			if (commandResult.messages.length > 0) {
-				messages = [...messages, ...commandResult.messages];
-			}
-			if (typeof commandResult.stateUpdates.isDebug === "boolean") {
-				isDebug = commandResult.stateUpdates.isDebug;
-			}
-			if (typeof commandResult.stateUpdates.awaitingNoteContent === "boolean") {
-				awaitingNoteContent = commandResult.stateUpdates.awaitingNoteContent;
-			}
-
-			draft = "";
-			isLoading = false;
-			await scrollToBottom();
-			textareaRef?.focus();
-			return;
-		}
-
-		const { nextMessages, thinkingMessage } = addUserAndThinkingMessages(messages, content);
-		messages = nextMessages;
 		draft = "";
+
+		if (submission.kind === "immediate") {
+			isLoading = false;
+			await scrollToBottom();
+			textareaRef?.focus();
+			return;
+		}
 
 		await scrollToBottom();
 
@@ -120,11 +94,11 @@
 			// 2) Read the assistant text from the API response.
 			// 3) Replace `assistantContent` with that real response text.
 			const assistantContent = await requestAssistantResponse(content, conversationId);
-			messages = replaceMessageContent(messages, thinkingMessage.id, assistantContent);
+			messages = replaceMessageContent(messages, submission.thinkingMessage.id, assistantContent);
 		} catch {
 			messages = replaceMessageContent(
 				messages,
-				thinkingMessage.id,
+				submission.thinkingMessage.id,
 				"Sorry, something went wrong while generating the response.",
 			);
 		} finally {

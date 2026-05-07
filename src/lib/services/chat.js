@@ -1,10 +1,11 @@
 import { resolveIntentResponse } from '$lib/services/intents.js';
+import { buildNotePreview, createNote } from '$lib/services/notes.js';
 
 const MAX_TEXTAREA_HEIGHT = 220;
 const STARTUP_MESSAGES = [
     'Hi Andy,\nWhat do you want to do today....',
 	'Welcome back. Ask a question or use a slash command to get started.',
-	'Chat is ready. Try a prompt or type / to see available commands.',
+	'Welcome to STAT. What can we do for you today?',
 	'Hello. I can respond to messages or route slash commands through mock intents.',
 	'Start anywhere. You can send a message or open the command list with /.'
 ];
@@ -119,6 +120,59 @@ function replaceMessageContent(messages, messageId, content) {
 	});
 }
 
+function toImmediateResult(messages, stateUpdates = {}) {
+	return {
+		kind: 'immediate',
+		messages,
+		stateUpdates,
+		thinkingMessage: null
+	};
+}
+
+function toAssistantRequestResult(messages, thinkingMessage, stateUpdates = {}) {
+	return {
+		kind: 'assistant-request',
+		messages,
+		stateUpdates,
+		thinkingMessage
+	};
+}
+
+async function resolveSubmission(content, { messages, awaitingNoteContent = false, isDebug = false } = {}) {
+	if (awaitingNoteContent && !content.startsWith('/')) {
+		const note = createNote(content);
+		const assistantMessage = note
+			? `Note saved: "${buildNotePreview(note.content)}"`
+			: 'Please send note content in your next message.';
+
+		return toImmediateResult(
+			[...messages, createMessage('user', content), createMessage('assistant', assistantMessage)],
+			{ awaitingNoteContent: !note }
+		);
+	}
+
+	const commandResult = await handleCommand(content, { isDebug });
+	if (commandResult.handled) {
+		const nextState = {
+			...commandResult.stateUpdates
+		};
+
+		if (awaitingNoteContent && content.startsWith('/')) {
+			nextState.awaitingNoteContent = false;
+		}
+
+		return toImmediateResult(
+			commandResult.messages.length > 0 ? [...messages, ...commandResult.messages] : messages,
+			nextState
+		);
+	}
+
+	const { nextMessages, thinkingMessage } = addUserAndThinkingMessages(messages, content);
+	return toAssistantRequestResult(nextMessages, thinkingMessage, {
+		awaitingNoteContent: awaitingNoteContent && content.startsWith('/') ? false : awaitingNoteContent
+	});
+}
+
 async function requestAssistantResponse(userText, conversationId) {
 	await new Promise((resolve) => setTimeout(resolve, 900));
 	return buildMockResponse(userText, conversationId);
@@ -132,6 +186,7 @@ export {
 	addUserAndThinkingMessages,
 	formatTimestamp,
 	replaceMessageContent,
+	resolveSubmission,
 	handleCommand,
 	requestAssistantResponse
 };
