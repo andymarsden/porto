@@ -7,7 +7,7 @@
 
     // App components
     import AppHeader from "$lib/components/app-header.svelte";
-    import { MessageAssistant, MessageUser } from "$lib/components/chat/index.js";
+    import { MessageAssistant, MessageUser, MessageThinking } from "$lib/components/chat/index.js";
 
     // UI components
     import { Badge } from "$lib/components/ui/badge/index.js";
@@ -90,7 +90,7 @@
 
         isThinking = true;
 
-        let thinkingMessage = createMessage("assistant", "thinking...");
+        let thinkingMessage = createMessage("thinking", "thinking...");
 
         draft = "";
         messages = [
@@ -185,11 +185,13 @@
                 {#each messages as message (message.id)}
                     {#if message.role === "user"}
                         <MessageUser {message} {formatTimestamp} />
-                    {:else}
+                    {:else if message.role === "assistant"}
                         <MessageAssistant
                             {message}
                             onOptionSelect={handleOptionSelect}
                         />
+                    {:else if message.role === "thinking"}
+                        <MessageThinking {message} />
                     {/if}
                 {/each}
                 <div bind:this={messageEndRef} aria-hidden="true"></div>
