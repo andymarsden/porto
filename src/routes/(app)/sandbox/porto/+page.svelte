@@ -2,49 +2,39 @@
     import { onMount, tick } from "svelte";
     import AppHeader from "$lib/components/app-header.svelte";
     import ChevronsUpDownIcon from "@lucide/svelte/icons/chevrons-up-down";
-    import {
-        MessageAssistant,
-        MessageUser,
-    } from "$lib/components/chat/index.js";
+    import { MessageAssistant,MessageUser} from "$lib/components/chat/index.js";
     import { Badge } from "$lib/components/ui/badge/index.js";
     import { Button } from "$lib/components/ui/button/index.js";
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
     import { Textarea } from "$lib/components/ui/textarea/index.js";
-    // import { MAX_TEXTAREA_HEIGHT, createMessage, formatTimestamp } from "$lib/services/chat.js";
-    import {
-        MAX_TEXTAREA_HEIGHT,
-        formatTimestamp,
-    } from "$lib/services/chat.js";
-    import {
-        createAssistantContentRevealer,
-        sendUserMessage,
-    } from "$lib/services/v2/chat.js";
+    import { formatTimestamp } from "$lib/utils.js";
+
+    const MAX_TEXTAREA_HEIGHT = 224;
+
     let messages = $state([]);
     let draft = $state("");
-    let isLoading = $state(false);
     let messageListRef = $state(null);
     let messageEndRef = $state(null);
     let textareaRef = $state(null);
+
+    function createMessage(role, content) {
+        return {
+            id: crypto.randomUUID(),
+            role,
+            content,
+            createdAt: new Date().toISOString(),
+        };
+    }
 
     function autoResizeTextarea() {
         if (!textareaRef) return;
 
         textareaRef.style.height = "auto";
-        const nextHeight = Math.min(
-            textareaRef.scrollHeight,
-            MAX_TEXTAREA_HEIGHT,
-        );
+        const nextHeight = Math.min(textareaRef.scrollHeight, MAX_TEXTAREA_HEIGHT);
         textareaRef.style.height = `${nextHeight}px`;
         textareaRef.style.overflowY =
             textareaRef.scrollHeight > MAX_TEXTAREA_HEIGHT ? "auto" : "hidden";
     }
-
-    const revealAssistantContent = createAssistantContentRevealer({
-        getMessages: () => messages,
-        setMessages: (nextMessages) => {
-            messages = nextMessages;
-        },
-    });
 
     async function scrollToBottom() {
         await tick();
@@ -56,62 +46,35 @@
         if (messageEndRef) {
             messageEndRef.scrollIntoView({ block: "end" });
         }
-
-        await new Promise((resolve) => requestAnimationFrame(resolve));
-
-        if (messageListRef) {
-            messageListRef.scrollTop = messageListRef.scrollHeight;
-        }
     }
 
-    //#region Send message logic
-    // Wrapper keeps Svelte rune assignments local while delegating pipeline logic to v2 chat service.
-    async function sendViaEngine(content) {
-        await sendUserMessage({
-            content: content,
-            isLoading: () => isLoading,
-            getMessages: () => messages,
-            setMessages: (nextMessages) => {
-                messages = nextMessages;
-            },
-            setIsLoading: (nextLoading) => {
-                isLoading = nextLoading;
-            },
-            scrollToBottom,
-            revealAssistantContent,
-            focusComposer: () => textareaRef?.focus(),
-        });
+    function handleOptionSelect(value) {
+        draft = value;
     }
 
-    async function sendMessage() {
+    async function handleSubmit(event) {
+        event.preventDefault();
+
         const content = draft.trim();
         if (!content) return;
+
         draft = "";
-        await sendViaEngine(content);
+        messages = [
+            ...messages,
+            createMessage("user", content),
+            createMessage("assistant", content),
+        ];
 
-        //         window.scrollTo({
-        // 	top: document.body.scrollHeight,
-        // 	behavior: "smooth"
-        // });
+        await scrollToBottom();
+        textareaRef?.focus();
     }
-
-    // Called when the user clicks an in-chat option button.
-    function handleOptionSelect(value) {
-        void sendViaEngine(value);
-    }
-    //#endregion
 
     function handleComposerKeydown(event) {
         if (event.key !== "Enter") return;
         if (event.shiftKey) return;
 
         event.preventDefault();
-        void sendMessage();
-    }
-
-    function handleSubmit(event) {
-        event.preventDefault();
-        void sendMessage();
+        void handleSubmit(event);
     }
 
     $effect(() => {
@@ -135,7 +98,7 @@
         { label: "Admin", href: "/app" },
         { label: "Sandbox", href: "/app/sandbox" },
     ]}
-    currentPage="Chat 2"
+    currentPage="Porto"
 />
 
 <main
@@ -149,7 +112,7 @@
         <Badge
             variant="outline"
             class="pointer-events-none absolute right-4 top-4 bg-blue-500 text-white dark:bg-blue-600 normal-case text-[12px] tracking-normal"
-            >chat mode</Badge
+            >echo mode</Badge
         >
 
         <div
@@ -181,13 +144,13 @@
                 class="relative mx-auto w-full max-w-3xl"
                 onsubmit={handleSubmit}
             >
-                <label class="sr-only" for="chat2-input">Message</label>
+                <label class="sr-only" for="porto-input">Message</label>
                 <div
                     class="bg-card ring-ring/30 focus-within:ring-ring rounded-3xl border p-2 shadow-sm transition-shadow focus-within:ring-2"
                 >
                     <div class="flex items-end gap-2">
                         <Textarea
-                            id="chat2-input"
+                            id="porto-input"
                             bind:ref={textareaRef}
                             bind:value={draft}
                             onkeydown={handleComposerKeydown}
@@ -218,8 +181,6 @@
                                 sideOffset={8}
                                 class="w-40 rounded-lg"
                             >
-                                <!-- Future: convert these placeholders into mode names and set a chatMode state in onSelect. -->
-                                <!-- Future: bind the top-right badge label to chatMode so selecting an item updates it. -->
                                 <DropdownMenu.Item>Option 1</DropdownMenu.Item>
                                 <DropdownMenu.Item>Option 2</DropdownMenu.Item>
                                 <DropdownMenu.Item>Option 3</DropdownMenu.Item>
@@ -229,9 +190,9 @@
                             type="submit"
                             size="icon-sm"
                             class="rounded-full"
-                            disabled={isLoading || !draft.trim()}
+                            disabled={!draft.trim()}
                         >
-                            {isLoading ? "..." : "↑"}
+                            ↑
                         </Button>
                     </div>
                 </div>
