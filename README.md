@@ -16,6 +16,7 @@ The list below is auto-generated from markdown files in [docs](docs/). Run `npm 
 - [Documentation Workflow](docs/documentation-workflow.md)
 - [Ideas](docs/ideas.md)
 - [Notes Prototype](docs/notes.md)
+- [Porto](docs/porto.md)
 - [Robots.txt Maintenance](docs/robots.md)
 <!-- docs-index:end -->
 

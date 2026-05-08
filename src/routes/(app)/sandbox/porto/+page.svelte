@@ -1,22 +1,39 @@
 <script>
+    // Svelte
     import { onMount, tick } from "svelte";
-    import AppHeader from "$lib/components/app-header.svelte";
+
+    // External UI assets
     import ChevronsUpDownIcon from "@lucide/svelte/icons/chevrons-up-down";
-    import { MessageAssistant,MessageUser} from "$lib/components/chat/index.js";
+
+    // App components
+    import AppHeader from "$lib/components/app-header.svelte";
+    import { MessageAssistant, MessageUser } from "$lib/components/chat/index.js";
+
+    // UI components
     import { Badge } from "$lib/components/ui/badge/index.js";
     import { Button } from "$lib/components/ui/button/index.js";
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
     import { Textarea } from "$lib/components/ui/textarea/index.js";
+
+    // Utils
     import { formatTimestamp } from "$lib/utils.js";
 
+    //#region Layout limits
     const MAX_TEXTAREA_HEIGHT = 224;
+    //#endregion
 
+    //#region Conversation state
     let messages = $state([]);
     let draft = $state("");
+    //#endregion
+
+    //#region DOM refs
     let messageListRef = $state(null);
     let messageEndRef = $state(null);
     let textareaRef = $state(null);
+    //#endregion
 
+    //#region Message factory
     function createMessage(role, content) {
         return {
             id: crypto.randomUUID(),
@@ -25,7 +42,9 @@
             createdAt: new Date().toISOString(),
         };
     }
+    //#endregion
 
+    //#region UI helpers
     function autoResizeTextarea() {
         if (!textareaRef) return;
 
@@ -47,7 +66,9 @@
             messageEndRef.scrollIntoView({ block: "end" });
         }
     }
+    //#endregion
 
+    //#region Composer handlers
     function handleOptionSelect(value) {
         draft = value;
     }
@@ -76,7 +97,9 @@
         event.preventDefault();
         void handleSubmit(event);
     }
+    //#endregion
 
+    //#region Reactive updates
     $effect(() => {
         draft;
         autoResizeTextarea();
@@ -86,11 +109,14 @@
         messages;
         void scrollToBottom();
     });
+    //#endregion
 
+    //#region Initial setup
     onMount(async () => {
         autoResizeTextarea();
         await scrollToBottom();
     });
+    //#endregion
 </script>
 
 <AppHeader
