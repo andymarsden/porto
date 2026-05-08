@@ -25,6 +25,7 @@
     //#region Conversation state
     let messages = $state([]);
     let draft = $state("");
+    let isThinking = $state(false);
     //#endregion
 
     //#region DOM refs
@@ -33,7 +34,7 @@
     let textareaRef = $state(null);
     //#endregion
 
-    //#region Message factory
+    //#region Chat specific
     function createMessage(role, content) {
         return {
             id: crypto.randomUUID(),
@@ -41,6 +42,12 @@
             content,
             createdAt: new Date().toISOString(),
         };
+    }
+
+    async function processMessage(content){
+        //fake processing delay
+        await new Promise((resolve) => {setTimeout(resolve, 1000); });
+        return "Echo: " + content;
     }
     //#endregion
 
@@ -79,12 +86,30 @@
         const content = draft.trim();
         if (!content) return;
 
+        let thinkingMessage = createMessage("assistant", "thinking...");
+
         draft = "";
         messages = [
             ...messages,
             createMessage("user", content),
-            createMessage("assistant", content),
+            thinkingMessage,
         ];
+
+
+        //#region get response and update messages
+        //This entire bit will need re thinking once we have actual streaming responses, but for now this is fine as there is a new ID generated for each message, so we can easily find and replace the "thinking..." message with the actual response once it's ready
+        const assistantResponse = await processMessage(content);
+
+        //remove the "thinking..." message
+        messages = messages.filter((msg) => msg.id !== thinkingMessage.id);
+        
+        //add the actual response
+        messages = [
+            ...messages,
+            createMessage("assistant", assistantResponse),
+        ];
+        //#endregion
+
 
         await scrollToBottom();
         textareaRef?.focus();
