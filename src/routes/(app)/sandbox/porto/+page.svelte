@@ -46,7 +46,7 @@
 
     async function processMessage(content){
         //fake processing delay
-        await new Promise((resolve) => {setTimeout(resolve, 1000); });
+        await new Promise((resolve) => {setTimeout(resolve, 3000); });
         return "Echo: " + content;
     }
     //#endregion
@@ -83,8 +83,12 @@
     async function handleSubmit(event) {
         event.preventDefault();
 
+        if (isThinking) return;
+
         const content = draft.trim();
         if (!content) return;
+
+        isThinking = true;
 
         let thinkingMessage = createMessage("assistant", "thinking...");
 
@@ -98,16 +102,20 @@
 
         //#region get response and update messages
         //This entire bit will need re thinking once we have actual streaming responses, but for now this is fine as there is a new ID generated for each message, so we can easily find and replace the "thinking..." message with the actual response once it's ready
-        const assistantResponse = await processMessage(content);
+        try {
+            const assistantResponse = await processMessage(content);
 
-        //remove the "thinking..." message
-        messages = messages.filter((msg) => msg.id !== thinkingMessage.id);
-        
-        //add the actual response
-        messages = [
-            ...messages,
-            createMessage("assistant", assistantResponse),
-        ];
+            //remove the "thinking..." message
+            messages = messages.filter((msg) => msg.id !== thinkingMessage.id);
+
+            //add the actual response
+            messages = [
+                ...messages,
+                createMessage("assistant", assistantResponse),
+            ];
+        } finally {
+            isThinking = false;
+        }
         //#endregion
 
 
@@ -194,6 +202,7 @@
             <form
                 class="relative mx-auto w-full max-w-3xl"
                 onsubmit={handleSubmit}
+                aria-busy={isThinking}
             >
                 <label class="sr-only" for="porto-input">Message</label>
                 <div
@@ -209,6 +218,7 @@
                             class="h-9 max-h-56 min-h-0 flex-1 resize-none border-0 bg-transparent px-3 py-1.5 shadow-none focus-visible:ring-0"
                             placeholder="Type a message..."
                             aria-describedby="composer-hint"
+                            disabled={isThinking}
                         />
                         <DropdownMenu.Root>
                             <DropdownMenu.Trigger>
@@ -217,6 +227,7 @@
                                         variant="ghost"
                                         size="icon-sm"
                                         class="rounded-full"
+                                        disabled={isThinking}
                                         {...props}
                                     >
                                         <ChevronsUpDownIcon class="size-4" />
@@ -241,9 +252,15 @@
                             type="submit"
                             size="icon-sm"
                             class="rounded-full"
-                            disabled={!draft.trim()}
+                            disabled={!draft.trim() || isThinking}
+                            aria-label={isThinking ? "Assistant is thinking" : "Send message"}
                         >
-                            ↑
+                            {#if isThinking}
+                                <span class="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-r-transparent" aria-hidden="true"></span>
+                                <span class="sr-only">Thinking...</span>
+                            {:else}
+                                ↑
+                            {/if}
                         </Button>
                     </div>
                 </div>
