@@ -16,7 +16,7 @@
 				<Button
 					variant="outline"
 					size="sm"
-					class="rounded-md"
+					class="rounded-md cursor-pointer"
 					onclick={() => onOptionSelect?.(option.value)}
 				>
 					{option.label}

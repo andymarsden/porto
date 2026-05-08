@@ -2,13 +2,19 @@
     import { onMount, tick } from "svelte";
     import AppHeader from "$lib/components/app-header.svelte";
     import ChevronsUpDownIcon from "@lucide/svelte/icons/chevrons-up-down";
-    import { MessageAssistant,  MessageUser, } from "$lib/components/chat/index.js";
+    import {
+        MessageAssistant,
+        MessageUser,
+    } from "$lib/components/chat/index.js";
     import { Badge } from "$lib/components/ui/badge/index.js";
     import { Button } from "$lib/components/ui/button/index.js";
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
     import { Textarea } from "$lib/components/ui/textarea/index.js";
     // import { MAX_TEXTAREA_HEIGHT, createMessage, formatTimestamp } from "$lib/services/chat.js";
-    import { MAX_TEXTAREA_HEIGHT,  formatTimestamp,} from "$lib/services/chat.js";
+    import {
+        MAX_TEXTAREA_HEIGHT,
+        formatTimestamp,
+    } from "$lib/services/chat.js";
     import {
         createMessage,
         replaceMessageContent,
@@ -33,8 +39,7 @@
         textareaRef.style.overflowY =
             textareaRef.scrollHeight > MAX_TEXTAREA_HEIGHT ? "auto" : "hidden";
     }
-    
-    //#region Word chunking logic
+
     function wait(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
@@ -46,7 +51,8 @@
 
         while (index < words.length) {
             const size =
-                minWords + Math.floor(Math.random() * (maxWords - minWords + 1));
+                minWords +
+                Math.floor(Math.random() * (maxWords - minWords + 1));
             chunks.push(words.slice(index, index + size).join(" "));
             index += size;
         }
@@ -58,7 +64,11 @@
         const normalizedText = String(fullText ?? "");
 
         if (!normalizedText.trim()) {
-            messages = replaceMessageContent(messages, messageId, normalizedText);
+            messages = replaceMessageContent(
+                messages,
+                messageId,
+                normalizedText,
+            );
             return;
         }
 
@@ -72,8 +82,6 @@
             await wait(30 + Math.random() * 40);
         }
     }
-    //#endregion
-    
 
     async function scrollToBottom() {
         await tick();
@@ -92,7 +100,7 @@
             messageListRef.scrollTop = messageListRef.scrollHeight;
         }
     }
-    
+
     //#region Send message logic
     // Wrapper keeps Svelte rune assignments local while delegating pipeline logic to chat_engine.
     async function sendViaEngine(content) {
@@ -100,8 +108,12 @@
             content: content,
             isLoading: () => isLoading,
             getMessages: () => messages,
-            setMessages: (nextMessages) => { messages = nextMessages; },
-            setIsLoading: (nextLoading) => { isLoading = nextLoading; },
+            setMessages: (nextMessages) => {
+                messages = nextMessages;
+            },
+            setIsLoading: (nextLoading) => {
+                isLoading = nextLoading;
+            },
             createMessage,
             scrollToBottom,
             revealAssistantContent,
@@ -109,12 +121,16 @@
         });
     }
 
-    
     async function sendMessage() {
         const content = draft.trim();
         if (!content) return;
         draft = "";
         await sendViaEngine(content);
+
+        //         window.scrollTo({
+        // 	top: document.body.scrollHeight,
+        // 	behavior: "smooth"
+        // });
     }
 
     // Called when the user clicks an in-chat option button.
@@ -160,37 +176,53 @@
     currentPage="Chat 2"
 />
 
-<main class="bg-background flex h-dvh min-h-0 flex-1 flex-col" aria-label="Chat page">
-    <section class="relative flex min-h-0 flex-1 flex-col" aria-label="Conversation">
+<main
+    class="bg-background flex h-dvh min-h-0 flex-1 flex-col"
+    aria-label="Chat page"
+>
+    <section
+        class="relative flex min-h-0 flex-1 flex-col"
+        aria-label="Conversation"
+    >
         <Badge
-
-        // messages-square
             variant="outline"
             class="pointer-events-none absolute right-4 top-4 bg-blue-500 text-white dark:bg-blue-600 normal-case text-[12px] tracking-normal"
+            >chat mode</Badge
         >
-            chat mode
-        </Badge>
 
-
-
-        <div bind:this={messageListRef} class="min-h-0 flex-1 overflow-y-auto" aria-live="polite" >
-            <div class="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-8 pb-28 md:px-6 md:pb-36" >
+        <div
+            bind:this={messageListRef}
+            class="min-h-0 flex-1 overflow-y-auto"
+            aria-live="polite"
+        >
+            <div
+                class="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-8 pb-28 md:px-6 md:pb-36"
+            >
                 {#each messages as message (message.id)}
                     {#if message.role === "user"}
                         <MessageUser {message} {formatTimestamp} />
                     {:else}
-                        <MessageAssistant {message} onOptionSelect={handleOptionSelect} />
+                        <MessageAssistant
+                            {message}
+                            onOptionSelect={handleOptionSelect}
+                        />
                     {/if}
                 {/each}
                 <div bind:this={messageEndRef} aria-hidden="true"></div>
             </div>
         </div>
 
-        <div class="from-background via-background/95 to-background sticky bottom-0 border-t bg-linear-to-t px-3 pb-3 pt-4 md:px-6 md:pb-6">
+        <div
+            class="from-background via-background/95 to-background sticky bottom-0 border-t bg-linear-to-t px-3 pb-3 pt-4 md:px-6 md:pb-6"
+        >
             <form
-                class="relative mx-auto w-full max-w-3xl" onsubmit={handleSubmit} >
+                class="relative mx-auto w-full max-w-3xl"
+                onsubmit={handleSubmit}
+            >
                 <label class="sr-only" for="chat2-input">Message</label>
-                <div class="bg-card ring-ring/30 focus-within:ring-ring rounded-3xl border p-2 shadow-sm transition-shadow focus-within:ring-2">
+                <div
+                    class="bg-card ring-ring/30 focus-within:ring-ring rounded-3xl border p-2 shadow-sm transition-shadow focus-within:ring-2"
+                >
                     <div class="flex items-end gap-2">
                         <Textarea
                             id="chat2-input"
@@ -212,7 +244,9 @@
                                         {...props}
                                     >
                                         <ChevronsUpDownIcon class="size-4" />
-                                        <span class="sr-only">Open composer menu</span>
+                                        <span class="sr-only"
+                                            >Open composer menu</span
+                                        >
                                     </Button>
                                 {/snippet}
                             </DropdownMenu.Trigger>
@@ -229,12 +263,20 @@
                                 <DropdownMenu.Item>Option 3</DropdownMenu.Item>
                             </DropdownMenu.Content>
                         </DropdownMenu.Root>
-                        <Button type="submit" size="icon-sm" class="rounded-full" disabled={isLoading || !draft.trim()} >
+                        <Button
+                            type="submit"
+                            size="icon-sm"
+                            class="rounded-full"
+                            disabled={isLoading || !draft.trim()}
+                        >
                             {isLoading ? "..." : "↑"}
                         </Button>
                     </div>
                 </div>
-                <p id="composer-hint" class="text-muted-foreground mt-2 px-2 text-xs">
+                <p
+                    id="composer-hint"
+                    class="text-muted-foreground mt-2 px-2 text-xs"
+                >
                     Enter sends. Shift + Enter adds a new line.
                 </p>
             </form>
