@@ -7,8 +7,8 @@
 
 export const debugCommands = {
 
-    async echo({text}){
-        return `Echo: ${text}`;
+    async echo({text,name}){
+        return `Echo: ${text} ` + name;
     }
     // async new({ text }) {
     //     return await createNote({ text });

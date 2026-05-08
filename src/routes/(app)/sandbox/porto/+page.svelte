@@ -16,6 +16,7 @@
     import { Textarea } from "$lib/components/ui/textarea/index.js";
 
     // Utils
+    import { resolveIntent } from "$lib/intent/resolve_intent.js";
     import { formatTimestamp } from "$lib/utils.js";
 
     //#region Layout limits
@@ -44,10 +45,17 @@
         };
     }
 
-    async function processMessage(content){
-        //fake processing delay
-        await new Promise((resolve) => {setTimeout(resolve, 3000); });
-        return "Echo: " + content;
+    async function processMessage(content) {
+        const text = String(content ?? "").trim();
+        
+        await new Promise((resolve) => {setTimeout(resolve, 700);});
+        // Keep local echo behavior for non-slash messages while command intent support is in progress.
+        if (!text.startsWith("/")) { 
+            return "DefaultEcho: " + text;
+        }
+
+        const intentResponse = await resolveIntent(text);
+        return String(intentResponse ?? "Unknown command. Try /echo <message>.");
     }
     //#endregion
 

@@ -1,24 +1,29 @@
 import { commands } from "$lib/commands";
 
 export async function resolveIntent(input) {
+    const text = String(input ?? "").trim();
 
-    if (input.startsWith("/n ")) {
-
-        const text = input.replace("/n ", "");
-
-        return await commands.note.new({
-            text
-        });
+    if (!text) {
+        return "Please enter a message.";
     }
 
-    if(input.startsWith("/echo ")){
-
-        const text = input.replace("/echo ", "");
-
-        return await commands.debug.echo({text});
+    if (!text.startsWith("/")) {
+        return null;
     }
 
-    // if (input.startsWith("/ne ")) {
+    if (text === "/n" || text.startsWith("/n ")) {
+        return "Notes are not wired yet in this sandbox. Try /echo <message> for now.";
+    }
+
+    if (text === "/echo" || text.startsWith("/echo ")) {
+        const echoText = text.replace(/^\/echo\s?/, "").trim();
+
+        return await commands.debug.echo({ name: "PortoUser",  text: echoText });
+    }
+
+    return "Unknown command. Try /echo <message>.";
+
+    // if (text.startsWith("/ne ")) {
 
     //     const [, id, text] = input.split("|");
 
@@ -28,7 +33,7 @@ export async function resolveIntent(input) {
     //     });
     // }
 
-    // if (input.startsWith("/t ")) {
+    // if (text.startsWith("/t ")) {
 
     //     const text = input.replace("/t ", "");
 
@@ -37,7 +42,7 @@ export async function resolveIntent(input) {
     //     });
     // }
 
-    // if (input.startsWith("/te ")) {
+    // if (text.startsWith("/te ")) {
 
     //     const [, id, text] = input.split("|");
 
