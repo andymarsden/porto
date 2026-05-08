@@ -17,7 +17,7 @@
 
     // Utils
     import { resolveIntent } from "$lib/intent/resolve_intent.js";
-    import { formatTimestamp } from "$lib/utils.js";
+    import { formatTimestamp, wait } from "$lib/utils.js";
 
     //#region Layout limits
     const MAX_TEXTAREA_HEIGHT = 224;
@@ -27,6 +27,7 @@
     let messages = $state([]);
     let draft = $state("");
     let isThinking = $state(false);
+    let activeFlow = $state(null);
     //#endregion
 
     //#region DOM refs
@@ -47,16 +48,21 @@
 
     async function processMessage(content) {
         const text = String(content ?? "").trim();
-        
-        await new Promise((resolve) => {setTimeout(resolve, 700);});
-        // Keep local echo behavior for non-slash messages while command intent support is in progress.
-        if (!text.startsWith("/")) { 
-            return "DefaultEcho: " + text;
-        }
+
+        await wait(700);
 
         const intentResponse = await resolveIntent(text);
-        return String(intentResponse ?? "Unknown command. Try /echo <message>.");
+        return String(intentResponse ?? "Unknown command. Try /echo <message>.(from page)");
     }
+
+    // async function handleUserMessage(content) {
+    //     if (activeFlow) {
+    //         return handleFlowAnswer(content);
+    //     }
+
+    //     return resolveIntent(content);
+    // }
+
     //#endregion
 
     //#region UI helpers

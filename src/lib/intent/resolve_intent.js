@@ -7,9 +7,9 @@ export async function resolveIntent(input) {
         return "Please enter a message.";
     }
 
-    if (!text.startsWith("/")) {
-        return null;
-    }
+    // if (!text.startsWith("/")) {
+    //     return null;
+    // }
 
     if (text === "/n" || text.startsWith("/n ")) {
         return "Notes are not wired yet in this sandbox. Try /echo <message> for now.";
@@ -21,7 +21,7 @@ export async function resolveIntent(input) {
         return await commands.debug.echo({ name: "PortoUser",  text: echoText });
     }
 
-    return "Unknown command. Try /echo <message>.";
+    return "Unknown command. Try /echo <message> (from intent).";
 
     // if (text.startsWith("/ne ")) {
 
