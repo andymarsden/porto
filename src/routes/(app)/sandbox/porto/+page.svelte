@@ -21,7 +21,7 @@
         saveFlowAnswer,
         startFlow,
     } from "$lib/flows/engine.js";
-    import { commands } from "$lib/commands";
+    import { persistCompletedFlow } from "$lib/flows/persistence.js";
     import { resolveIntent } from "$lib/intent/resolve_intent.js";
     import { formatTimestamp, wait, generateId } from "$lib/utils.js";
 
@@ -76,11 +76,7 @@
             activeFlow = result.activeFlow;
 
             if (result.isComplete) {
-                if (activeFlow.id === "basic-details") {
-                    await commands.basicDetails.saveFlow({ answers: result.answers });
-                } else if (activeFlow.id === "favorite-food") {
-                    await commands.food.saveFlow({ answers: result.answers });
-                }
+                await persistCompletedFlow(activeFlow.id, result.answers);
                 const answers = JSON.stringify(result.answers, null, 2);
                 activeFlow = null;
 
