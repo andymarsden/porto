@@ -176,3 +176,30 @@ export async function sendUserMessage({
         focusComposer?.();
     }
 }
+
+
+const INTENT_RULES = [
+    {
+        intent: "get_weather",
+        matches: ({ lowerText }) => hasWord(lowerText, "weather"),
+    },
+    {
+        intent: "create_note",
+        matches: ({ lowerText }) =>
+            lowerText.startsWith("/n") || lowerText === "new note",
+    },
+    {
+        intent: "greeting",
+        matches: ({ lowerText }) =>
+            hasWord(lowerText, "hello") || hasWord(lowerText, "hi"),
+    },
+    {
+        intent: "echo",
+        matches: ({ lowerText }) => hasWord(lowerText, "echo"),
+    },
+    {
+        intent: "options",
+        matches: ({ lowerText }) =>
+            lowerText.startsWith("/o") || hasWord(lowerText, "options"),
+    },
+];
