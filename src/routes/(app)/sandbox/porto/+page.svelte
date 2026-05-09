@@ -72,7 +72,8 @@
         // }
 
         if (activeFlow) {
-            const result = saveFlowAnswer(activeFlow, text);
+
+            const result = await saveFlowAnswer(activeFlow, text);
             activeFlow = result.activeFlow;
 
             if (result.isComplete) {

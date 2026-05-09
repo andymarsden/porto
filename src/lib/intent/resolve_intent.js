@@ -31,7 +31,7 @@ export async function resolveIntent(input) {
 
     if(text === "/onboard") {  
         console.log("Starting onboarding flow...");
-        const activeFlow = startFlow("basic-details");
+        const activeFlow = await startFlow("basic-details");
 
         if (!activeFlow) {
             return createIntentResponse("That flow is unavailable right now.");
@@ -42,9 +42,9 @@ export async function resolveIntent(input) {
     }
 
     if(text === "/food") {  
-        console.log("Starting food flow...");
-        const activeFlow = startFlow("favorite-food");
-
+        //console.log("Starting food flow...");
+        const activeFlow = await startFlow("favorite-food");
+        //console.log("From: resolveIntent - Active Flow", activeFlow);
         if (!activeFlow) {
             return createIntentResponse("That flow is unavailable right now.");
         }
