@@ -1,3 +1,8 @@
+//TODO
+//can you o one more pass to make the command handling even cleaner by extracting each command (/onboard, /food, /echo, etc.) into a small command map so resolveIntent becomes mostly lookup + dispatch
+
+
+
 import { commands } from "$lib/commands";
 import { startFlow  } from "$lib/flows/engine.js";
 
