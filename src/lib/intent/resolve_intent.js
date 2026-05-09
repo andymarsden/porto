@@ -11,6 +11,11 @@ export async function resolveIntent(input) {
     //     return null;
     // }
 
+    if (intent === "start-onboarding") {
+        activeFlow = startFlow("basic-details");
+        return activeFlow.flow.steps[0].question;
+    }
+
     if (text === "/n" || text.startsWith("/n ")) {
         return "Notes are not wired yet in this sandbox. Try /echo <message> for now.";
     }

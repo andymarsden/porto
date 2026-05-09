@@ -27,7 +27,7 @@
     let messages = $state([]);
     let draft = $state("");
     let isThinking = $state(false);
-    let isActiveFlow = $state(null);
+    let activeFlow = $state(null);
     //#endregion
 
     //#region DOM refs
@@ -56,7 +56,7 @@
     }
 
     // async function handleUserMessage(content) {
-    //     if (isActiveFlow) {
+    //     if (activeFlow) {
     //         return handleFlowAnswer(content);
     //     }
 
@@ -107,6 +107,8 @@
         let thinkingMessage = createMessage("thinking", "thinking...");
 
         draft = "";
+        
+        //Add messaged back to messages, with a user message and a "thinking..." message that we can replace later with the actual response
         messages = [
             ...messages,
             createMessage("user", content),
