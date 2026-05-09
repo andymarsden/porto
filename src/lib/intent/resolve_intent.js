@@ -20,23 +20,37 @@ export async function resolveIntent(input) {
     if(text === "/onboard") {  
         console.log("Starting onboarding flow...");
         let activeFlow = startFlow("basic-details");
-        return activeFlow.flow.steps[0].question;
+        
+        let response = {};
+        response.activeFlow = activeFlow;
+        response.text = activeFlow.flow.steps[0].question;
+        return response;
+        //return activeFlow.flow.steps[0].question;
     }
 
     if(text === "/food") {  
         console.log("Starting food flow...");
         let activeFlow = startFlow("favorite-food");
-        return activeFlow.flow.steps[0].question;
+        
+        let response = {};
+        response.activeFlow = activeFlow;
+        response.text = activeFlow.flow.steps[0].question;
+        return response;
+        //return activeFlow.flow.steps[0].question;
     }
 
     if (text === "/n" || text.startsWith("/n ")) {
-        return "Notes are not wired yet in this sandbox. Try /echo <message> for now.";
+        let response = {};
+        response.text = "Notes are not wired yet in this sandbox. Try /echo <message> for now.";
+        return response;
     }
 
     if (text === "/echo" || text.startsWith("/echo ")) {
         const echoText = text.replace(/^\/echo\s?/, "").trim();
-
-        return await commands.debug.echo({ name: "PortoUser",  text: echoText });
+        let response = {};
+        response.text = await commands.debug.echo({ name: "PortoUser",  text: echoText });
+        return response;
+        //return await commands.debug.echo({ name: "PortoUser",  text: echoText });
     }
 
     //DEMO only as basicDetails is hardcoded in the flow engine. This is to show how we can retrieve saved flow payloads via commands.

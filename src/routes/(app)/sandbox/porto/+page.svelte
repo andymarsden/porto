@@ -23,7 +23,7 @@
     } from "$lib/flows/engine.js";
     import { commands } from "$lib/commands";
     import { resolveIntent } from "$lib/intent/resolve_intent.js";
-    import { formatTimestamp, wait } from "$lib/utils.js";
+    import { formatTimestamp, wait, generateId } from "$lib/utils.js";
 
     //#region Layout limits
     const MAX_TEXTAREA_HEIGHT = 224;
@@ -45,7 +45,7 @@
     //#region Chat specific
     function createMessage(role, content) {
         return {
-            id: crypto.randomUUID(),
+            id: generateId(),
             role,
             content,
             createdAt: new Date().toISOString(),
@@ -57,19 +57,19 @@
 
         await wait(700);
 
-        if (text === "/onboard") {
-            activeFlow = startFlow("basic-details");
+        // if (text === "/onboard") {
+        //     activeFlow = startFlow("basic-details");
 
-            const step = getCurrentFlowStep(activeFlow);
-            return step?.question ?? "That flow is unavailable right now.";
-        }
+        //     const step = getCurrentFlowStep(activeFlow);
+        //     return step?.question ?? "That flow is unavailable right now.";
+        // }
 
-         if (text === "/food") {
-            activeFlow = startFlow("favorite-food");
+        // if (text === "/food") {
+        //     activeFlow = startFlow("favorite-food");
 
-            const step = getCurrentFlowStep(activeFlow);
-            return step?.question ?? "That flow is unavailable right now.";
-        }
+        //     const step = getCurrentFlowStep(activeFlow);
+        //     return step?.question ?? "That flow is unavailable right now.";
+        // }
 
         if (activeFlow) {
             const result = saveFlowAnswer(activeFlow, text);
@@ -91,7 +91,12 @@
         }
 
         const intentResponse = await resolveIntent(text);
-        return String(intentResponse ?? "Unknown command. Try /echo <message>.(from page)");
+        if(intentResponse.activeFlow) {
+            activeFlow = intentResponse.activeFlow;
+        }
+
+
+        return String(intentResponse.text ?? "Unknown command. Try /echo <message>.(from page)");
     }
 
     // async function handleUserMessage(content) {
