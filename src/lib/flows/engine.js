@@ -8,27 +8,29 @@ const flowRegistry = {
     "favorite-food": foodFlow
 };
 
+function getSetupCommand(step) {
+    return step?.setupCommand ?? step?.setup_command ?? null;
+}
+
 export async function startFlow(id) {
     const flow = flowRegistry[id];
-    const firstStep = flow?.steps?.[0];
-    console.log("From: startFlow - THIS STEP", flow);
-
-    console.log("From: startFlow - First Step", firstStep);
-
 
     if (!flow) {
         return null;
     }
-    // run first step command if exists
+    const firstStep = flow.steps?.[0] ?? null;
+    const setupCommand = getSetupCommand(firstStep);
 
-    if (firstStep?.setup_command) {
-
-        const result =
-            //await executeCommand(firstStep.command,{answer,stepId: firstStep.id,answers: flowState.answers});
-            //no payload for first step, just id
-            await executeCommand(firstStep.setup_command,{id});
-
-        console.log("From: startFlow - First Step Command Result", result);
+    if (setupCommand) {
+        try {
+            await executeCommand(setupCommand, {
+                id,
+                stepId: firstStep.id,
+                answers: {}
+            });
+        } catch (error) {
+            console.warn(`[flows.engine] Setup command failed for flow id: ${id}`, error);
+        }
     }
 
     return {
@@ -62,14 +64,24 @@ export async function saveFlowAnswer(activeFlow, answer) {
         };
     }
 
-    // run current step command if exists
+    const normalizedAnswer = String(answer ?? "").trim();
+    const answers = {
+        ...activeFlow.answers,
+        [currentStep.id]: normalizedAnswer
+    };
+
+    // run current step command if exists - this is a kind of validate command etc.
 
     if (currentStep?.command) {
-
-        const result =
-            await executeCommand(currentStep.command,{answer,stepId: currentStep.id,answers: activeFlow.answers});
-
-        console.log("CURRENT STEP COMMAND", result);
+        try {
+            await executeCommand(currentStep.command, {
+                answer: normalizedAnswer,
+                stepId: currentStep.id,
+                answers
+            });
+        } catch (error) {
+            console.warn(`[flows.engine] Step command failed for flow id: ${activeFlow.id}, step id: ${currentStep.id}`, error);
+        }
     }
 
 
@@ -84,14 +96,12 @@ export async function saveFlowAnswer(activeFlow, answer) {
     //Go to next step and save answer to current step
     const nextFlow = {
         ...activeFlow,
-        answers: {
-            ...activeFlow.answers,
-            [currentStep.id]: String(answer ?? "").trim()
-        },
+        answers,
         currentStep: activeFlow.currentStep + 1
     };
-    //TODO
-    //run aftercommand for current step if exists
+    //TODO if the next step has a pre command, run it here and handle errors gracefully
+
+
 
     return {
         activeFlow: nextFlow,

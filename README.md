@@ -14,6 +14,7 @@ The list below is auto-generated from markdown files in [docs](docs/). Run `npm 
 - [Commands](docs/commands.md)
 - [Conversations](docs/conversations.md)
 - [Documentation Workflow](docs/documentation-workflow.md)
+- [Flow Onboarding Guide](docs/flow-onboarding.md)
 - [Ideas](docs/ideas.md)
 - [Notes Prototype](docs/notes.md)
 - [Oldchat](docs/oldchat.md)

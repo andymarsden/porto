@@ -1,13 +1,11 @@
-import { command } from "$app/server";
-
 export const foodFlow = {
-    id: "food",
+    id: "favorite-food",
 
     steps: [
         {
             id: "chineese-food",
             question: "What is your favorite Chinese food?",
-            setup_command: "food.setup"
+            setupCommand: "food.setup"
         },
 
         {
