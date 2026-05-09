@@ -1,4 +1,5 @@
 import { commands } from "$lib/commands";
+import { startFlow  } from "$lib/flows/engine.js";
 
 export async function resolveIntent(input) {
     const text = String(input ?? "").trim();
@@ -11,8 +12,14 @@ export async function resolveIntent(input) {
     //     return null;
     // }
 
-    if (intent === "start-onboarding") {
-        activeFlow = startFlow("basic-details");
+    // if (intent === "start-onboarding") {
+    //     activeFlow = startFlow("basic-details");
+    //     return activeFlow.flow.steps[0].question;
+    // }
+
+    if(text === "/onboard") {  
+        console.log("Starting onboarding flow...");
+        let activeFlow = startFlow("basic-details");
         return activeFlow.flow.steps[0].question;
     }
 

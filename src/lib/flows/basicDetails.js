@@ -1,4 +1,4 @@
-export const onboarding = {
+export const basicDetailsFlow = {
     id: "basic-details",
 
     steps: [
