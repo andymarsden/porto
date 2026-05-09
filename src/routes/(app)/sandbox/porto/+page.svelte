@@ -16,6 +16,11 @@
     import { Textarea } from "$lib/components/ui/textarea/index.js";
 
     // Utils
+    import {
+        getCurrentFlowStep,
+        saveFlowAnswer,
+        startFlow,
+    } from "$lib/flows/engine.js";
     import { resolveIntent } from "$lib/intent/resolve_intent.js";
     import { formatTimestamp, wait } from "$lib/utils.js";
 
@@ -50,6 +55,27 @@
         const text = String(content ?? "").trim();
 
         await wait(700);
+
+        if (text === "/onboard") {
+            activeFlow = startFlow("basic-details");
+
+            const step = getCurrentFlowStep(activeFlow);
+            return step?.question ?? "That flow is unavailable right now.";
+        }
+
+        if (activeFlow) {
+            const result = saveFlowAnswer(activeFlow, text);
+            activeFlow = result.activeFlow;
+
+            if (result.isComplete) {
+                const answers = JSON.stringify(result.answers, null, 2);
+                activeFlow = null;
+
+                return `Great, I have saved your answers:\n${answers}`;
+            }
+
+            return result.nextStep?.question ?? "Flow step is missing.";
+        }
 
         const intentResponse = await resolveIntent(text);
         return String(intentResponse ?? "Unknown command. Try /echo <message>.(from page)");
