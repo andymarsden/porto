@@ -228,7 +228,7 @@
         <Badge
             variant="outline"
             class="pointer-events-none absolute right-4 top-4 hidden bg-blue-500 text-white dark:bg-blue-600 normal-case text-[12px] tracking-normal sm:inline-flex"
-            >echo mode</Badge
+            >{activeFlow ? 'flow mode' : 'echo mode'}</Badge
         >
 
         <div
