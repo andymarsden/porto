@@ -27,7 +27,7 @@
     let messages = $state([]);
     let draft = $state("");
     let isThinking = $state(false);
-    let activeFlow = $state(null);
+    let isActiveFlow = $state(null);
     //#endregion
 
     //#region DOM refs
@@ -56,7 +56,7 @@
     }
 
     // async function handleUserMessage(content) {
-    //     if (activeFlow) {
+    //     if (isActiveFlow) {
     //         return handleFlowAnswer(content);
     //     }
 
