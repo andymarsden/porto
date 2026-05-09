@@ -21,6 +21,7 @@
         saveFlowAnswer,
         startFlow,
     } from "$lib/flows/engine.js";
+    import { commands } from "$lib/commands";
     import { resolveIntent } from "$lib/intent/resolve_intent.js";
     import { formatTimestamp, wait } from "$lib/utils.js";
 
@@ -68,6 +69,7 @@
             activeFlow = result.activeFlow;
 
             if (result.isComplete) {
+                await commands.basicDetails.saveFlow({ answers: result.answers });
                 const answers = JSON.stringify(result.answers, null, 2);
                 activeFlow = null;
 

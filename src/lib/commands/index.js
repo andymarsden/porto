@@ -10,9 +10,11 @@
 // };
 
 import { debugCommands } from "./debug";
+import { basicDetailsCommands } from "./basic-details";
 
 export const commands = {
-    debug: debugCommands
+    debug: debugCommands,
+    basicDetails: basicDetailsCommands
     // note: noteCommands,
     // task: taskCommands
 };
