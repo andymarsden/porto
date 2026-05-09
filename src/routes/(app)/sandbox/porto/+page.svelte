@@ -64,12 +64,23 @@
             return step?.question ?? "That flow is unavailable right now.";
         }
 
+         if (text === "/food") {
+            activeFlow = startFlow("favorite-food");
+
+            const step = getCurrentFlowStep(activeFlow);
+            return step?.question ?? "That flow is unavailable right now.";
+        }
+
         if (activeFlow) {
             const result = saveFlowAnswer(activeFlow, text);
             activeFlow = result.activeFlow;
 
             if (result.isComplete) {
-                await commands.basicDetails.saveFlow({ answers: result.answers });
+                if (activeFlow.id === "basic-details") {
+                    await commands.basicDetails.saveFlow({ answers: result.answers });
+                } else if (activeFlow.id === "favorite-food") {
+                    await commands.food.saveFlow({ answers: result.answers });
+                }
                 const answers = JSON.stringify(result.answers, null, 2);
                 activeFlow = null;
 

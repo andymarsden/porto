@@ -23,6 +23,12 @@ export async function resolveIntent(input) {
         return activeFlow.flow.steps[0].question;
     }
 
+    if(text === "/food") {  
+        console.log("Starting food flow...");
+        let activeFlow = startFlow("favorite-food");
+        return activeFlow.flow.steps[0].question;
+    }
+
     if (text === "/n" || text.startsWith("/n ")) {
         return "Notes are not wired yet in this sandbox. Try /echo <message> for now.";
     }

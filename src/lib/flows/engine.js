@@ -1,8 +1,10 @@
 
 import { basicDetailsFlow } from "./basicDetails";
+import { foodFlow } from "./food";
 
 const flowRegistry = {
-    "basic-details": basicDetailsFlow
+    "basic-details": basicDetailsFlow,
+    "favorite-food": foodFlow
 };
 
 export function startFlow(id) {
