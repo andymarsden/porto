@@ -33,7 +33,18 @@ export async function resolveIntent(input) {
         return await commands.debug.echo({ name: "PortoUser",  text: echoText });
     }
 
-    return "Unknown command. Try /echo <message> (from intent).";
+    //DEMO only as basicDetails is hardcoded in the flow engine. This is to show how we can retrieve saved flow payloads via commands.
+    if (text === "/flow-list") {
+        const latestFlow = await commands.basicDetails.getLastSavedFlow();
+
+        if (!latestFlow) {
+            return "No saved flow payloads yet. Run /onboard and complete the flow first.";
+        }
+
+        return `Latest flow payload:\n${JSON.stringify(latestFlow, null, 2)}`;
+    }
+
+    return "Unknown command. Try /echo <message> or /flow-list (from intent).";
 
     // if (text.startsWith("/ne ")) {
 
