@@ -88,12 +88,16 @@
         }
 
         const intentResponse = await resolveIntent(text);
-        if(intentResponse.activeFlow) {
-            activeFlow = intentResponse.activeFlow;
+        const normalizedIntentResponse =
+            intentResponse && typeof intentResponse === "object"
+                ? intentResponse
+                : { text: intentResponse, activeFlow: null };
+
+        if (normalizedIntentResponse.activeFlow) {
+            activeFlow = normalizedIntentResponse.activeFlow;
         }
 
-
-        return String(intentResponse.text ?? "Unknown command. Try /echo <message>.(from page)");
+        return String(normalizedIntentResponse.text ?? "Unknown command. Try /echo <message>.(from page)");
     }
 
     // async function handleUserMessage(content) {

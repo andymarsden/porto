@@ -20,15 +20,6 @@ export async function resolveIntent(input) {
         return createIntentResponse("Please enter a message.");
     }
 
-    // if (!text.startsWith("/")) {
-    //     return null;
-    // }
-
-    // if (intent === "start-onboarding") {
-    //     activeFlow = startFlow("basic-details");
-    //     return activeFlow.flow.steps[0].question;
-    // }
-
     if(text === "/onboard") {  
         console.log("Starting onboarding flow...");
         const activeFlow = await startFlow("basic-details");
@@ -64,6 +55,22 @@ export async function resolveIntent(input) {
         //return await commands.debug.echo({ name: "PortoUser",  text: echoText });
     }
 
+    if (text === "/play" || text.startsWith("/play ")) {
+        const music = text.replace(/^\/play\s?/, "").trim() || "random";
+        console.log("Enqueueing music:", music);
+        const result = await commands.play.enqueue({ music });
+
+        console.log("[/play] album name:", result?.data?.name);
+
+        console.log("[/play] artist name:", result?.data?.artists?.[0]?.name);
+
+        if (!result?.ok) {
+            return createIntentResponse(`Could not queue music right now. Tried: ${music}`);
+        }
+
+        return createIntentResponse(`Now playing ${result?.data?.name} by ${result?.data?.artists?.[0]?.name}`);
+    }
+
     //DEMO only as basicDetails is hardcoded in the flow engine. This is to show how we can retrieve saved flow payloads via commands.
     if (text === "/flow-list") {
         const latestFlow = await commands.basicDetails.getLastSavedFlow();
@@ -76,33 +83,4 @@ export async function resolveIntent(input) {
     }
 
     return createIntentResponse("Unknown command. Try /echo <message> or /flow-list (from intent).");
-
-    // if (text.startsWith("/ne ")) {
-
-    //     const [, id, text] = input.split("|");
-
-    //     return await commands.note.edit({
-    //         id,
-    //         text
-    //     });
-    // }
-
-    // if (text.startsWith("/t ")) {
-
-    //     const text = input.replace("/t ", "");
-
-    //     return await commands.task.new({
-    //         text
-    //     });
-    // }
-
-    // if (text.startsWith("/te ")) {
-
-    //     const [, id, text] = input.split("|");
-
-    //     return await commands.task.edit({
-    //         id,
-    //         text
-    //     });
-    // }
 }
