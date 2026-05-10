@@ -7,7 +7,7 @@
 
     // App components
     import AppHeader from "$lib/components/app-header.svelte";
-    import { MessageAssistant, MessageUser, MessageThinking, MessageAlbumCard } from "$lib/components/chat/index.js";
+    import { MessageAssistant, MessageUser, MessageThinking, MessageAlbumCard, MessageChart } from "$lib/components/chat/index.js";
 
     // UI components
     import { Badge } from "$lib/components/ui/badge/index.js";
@@ -252,6 +252,8 @@
                         <MessageUser {message} {formatTimestamp} />
                     {:else if message.role === "assistant" && message.card?.type === "album"}
                         <MessageAlbumCard {message} />
+                        {:else if message.role === "assistant" && message.card?.type === "chart"}
+                        <MessageChart {message} />
                     {:else if message.role === "assistant"}
                         <MessageAssistant
                             {message}
