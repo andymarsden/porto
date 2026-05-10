@@ -58,12 +58,7 @@ export async function resolveIntent(input) {
 
     if (text === "/play" || text.startsWith("/play ")) {
         const music = text.replace(/^\/play\s?/, "").trim() || "random";
-        console.log("Enqueueing music:", music);
         const result = await commands.play.enqueue({ music });
-
-        console.log("[/play] album name:", result?.data?.name);
-
-        console.log("[/play] artist name:", result?.data?.artists?.[0]?.name);
 
         if (!result?.ok) {
             return createIntentResponse(`Could not queue music right now. Tried: ${music}`);
