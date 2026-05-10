@@ -312,9 +312,9 @@
                                 sideOffset={8}
                                 class="w-40 rounded-lg"
                             >
-                                <DropdownMenu.Item>Option 1</DropdownMenu.Item>
-                                <DropdownMenu.Item>Option 2</DropdownMenu.Item>
-                                <DropdownMenu.Item>Option 3</DropdownMenu.Item>
+                                <DropdownMenu.Item>Live 1.5.2</DropdownMenu.Item>
+                                <DropdownMenu.Item>Preview 2.3</DropdownMenu.Item>
+                                <DropdownMenu.Item>Test 2.6.1</DropdownMenu.Item>
                             </DropdownMenu.Content>
                         </DropdownMenu.Root>
                         <Button
