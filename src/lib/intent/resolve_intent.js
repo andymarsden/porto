@@ -74,6 +74,18 @@ export async function resolveIntent(input) {
         return createIntentResponse(null, null, albumCard);
     }
 
+    if (text === "/chart" || text.startsWith("/chart ")) {
+        const chartCard = {
+            type: "chart",
+            labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+            datasets: [{
+                label: "Activity",
+                data: [18, 21, 19, 24, 22, 26, 23],
+            }]
+        };
+        return createIntentResponse(null, null, chartCard);
+    }
+
     //DEMO only as basicDetails is hardcoded in the flow engine. This is to show how we can retrieve saved flow payloads via commands.
     if (text === "/flow-list") {
         const latestFlow = await commands.basicDetails.getLastSavedFlow();

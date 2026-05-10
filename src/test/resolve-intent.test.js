@@ -69,3 +69,30 @@ describe('resolveIntent /play command', () => {
 		});
 	});
 });
+
+describe('resolveIntent /chart command', () => {
+	it('returns a chart card when /chart is called', async () => {
+		const response = await resolveIntent('/chart');
+
+		expect(response).toEqual({
+			text: null,
+			activeFlow: null,
+			card: {
+				type: 'chart',
+				labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+				datasets: [{
+					label: 'Activity',
+					data: [18, 21, 19, 24, 22, 26, 23]
+				}]
+			}
+		});
+	});
+
+	it('returns the same chart card when /chart has trailing arguments', async () => {
+		const response = await resolveIntent('/chart ignored argument');
+
+		expect(response.card.type).toBe('chart');
+		expect(response.card.labels).toBeDefined();
+		expect(response.card.datasets).toBeDefined();
+	});
+});

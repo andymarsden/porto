@@ -7,7 +7,13 @@
 
     // App components
     import AppHeader from "$lib/components/app-header.svelte";
-    import { MessageAssistant, MessageUser, MessageThinking, MessageAlbumCard, MessageChart } from "$lib/components/chat/index.js";
+    import {
+        MessageAssistant,
+        MessageUser,
+        MessageThinking,
+        MessageAlbumCard,
+        MessageChart,
+    } from "$lib/components/chat/index.js";
 
     // UI components
     import { Badge } from "$lib/components/ui/badge/index.js";
@@ -72,7 +78,6 @@
         // }
 
         if (activeFlow) {
-
             const result = await saveFlowAnswer(activeFlow, text);
             activeFlow = result.activeFlow;
 
@@ -81,10 +86,16 @@
                 const answers = JSON.stringify(result.answers, null, 2);
                 activeFlow = null;
 
-                return { text: `Great, I have saved your answers:\n${answers}`, card: null };
+                return {
+                    text: `Great, I have saved your answers:\n${answers}`,
+                    card: null,
+                };
             }
 
-            return { text: result.nextStep?.question ?? "Flow step is missing.", card: null };
+            return {
+                text: result.nextStep?.question ?? "Flow step is missing.",
+                card: null,
+            };
         }
 
         const intentResponse = await resolveIntent(text);
@@ -98,7 +109,9 @@
         }
 
         return {
-            text: normalizedIntentResponse.text ?? "Unknown command. Try /echo <message>.(from page)",
+            text:
+                normalizedIntentResponse.text ??
+                "Unknown command. Try /echo <message>.(from page)",
             card: normalizedIntentResponse.card ?? null,
         };
     }
@@ -118,7 +131,10 @@
         if (!textareaRef) return;
 
         textareaRef.style.height = "auto";
-        const nextHeight = Math.min(textareaRef.scrollHeight, MAX_TEXTAREA_HEIGHT);
+        const nextHeight = Math.min(
+            textareaRef.scrollHeight,
+            MAX_TEXTAREA_HEIGHT,
+        );
         textareaRef.style.height = `${nextHeight}px`;
         textareaRef.style.overflowY =
             textareaRef.scrollHeight > MAX_TEXTAREA_HEIGHT ? "auto" : "hidden";
@@ -155,14 +171,13 @@
         let thinkingMessage = createMessage("thinking", "thinking...");
 
         draft = "";
-        
+
         //Add messaged back to messages, with a user message and a "thinking..." message that we can replace later with the actual response
         messages = [
             ...messages,
             createMessage("user", content),
             thinkingMessage,
         ];
-
 
         //#region get response and update messages
         //This entire bit will need re thinking once we have actual streaming responses, but for now this is fine as there is a new ID generated for each message, so we can easily find and replace the "thinking..." message with the actual response once it's ready
@@ -173,7 +188,10 @@
             messages = messages.filter((msg) => msg.id !== thinkingMessage.id);
 
             //add the actual response
-            const assistantMessage = createMessage("assistant", assistantResponse.text);
+            const assistantMessage = createMessage(
+                "assistant",
+                assistantResponse.text,
+            );
             if (assistantResponse.card) {
                 assistantMessage.card = assistantResponse.card;
             }
@@ -182,7 +200,6 @@
             isThinking = false;
         }
         //#endregion
-
 
         await scrollToBottom();
         textareaRef?.focus();
@@ -236,7 +253,7 @@
         <Badge
             variant="outline"
             class="pointer-events-none absolute right-4 top-4 hidden bg-blue-500 text-white dark:bg-blue-600 normal-case text-[12px] tracking-normal sm:inline-flex"
-            >{activeFlow ? 'flow mode' : 'echo mode'}</Badge
+            >{activeFlow ? "flow mode" : "echo mode"}</Badge
         >
 
         <div
@@ -252,7 +269,7 @@
                         <MessageUser {message} {formatTimestamp} />
                     {:else if message.role === "assistant" && message.card?.type === "album"}
                         <MessageAlbumCard {message} />
-                        {:else if message.role === "assistant" && message.card?.type === "chart"}
+                    {:else if message.role === "assistant" && message.card?.type === "chart"}
                         <MessageChart {message} />
                     {:else if message.role === "assistant"}
                         <MessageAssistant
@@ -314,9 +331,13 @@
                                 sideOffset={8}
                                 class="w-40 rounded-lg"
                             >
-                                <DropdownMenu.Item>Live 1.5.2</DropdownMenu.Item>
-                                <DropdownMenu.Item>Preview 2.3</DropdownMenu.Item>
-                                <DropdownMenu.Item>Test 2.6.1</DropdownMenu.Item>
+                                <DropdownMenu.Item>Live 1.5.2</DropdownMenu.Item
+                                >
+                                <DropdownMenu.Item
+                                    >Preview 2.3</DropdownMenu.Item
+                                >
+                                <DropdownMenu.Item>Test 2.6.1</DropdownMenu.Item
+                                >
                             </DropdownMenu.Content>
                         </DropdownMenu.Root>
                         <Button
@@ -324,10 +345,15 @@
                             size="icon-sm"
                             class="rounded-full"
                             disabled={!draft.trim() || isThinking}
-                            aria-label={isThinking ? "Assistant is thinking" : "Send message"}
+                            aria-label={isThinking
+                                ? "Assistant is thinking"
+                                : "Send message"}
                         >
                             {#if isThinking}
-                                <span class="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-r-transparent" aria-hidden="true"></span>
+                                <span
+                                    class="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-r-transparent"
+                                    aria-hidden="true"
+                                ></span>
                                 <span class="sr-only">Thinking...</span>
                             {:else}
                                 ↑

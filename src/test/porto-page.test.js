@@ -94,4 +94,32 @@ describe('Porto page', () => {
 
 		expect(await screen.findByText('Unknown command. Try /echo <message>.(from page)')).toBeInTheDocument();
 	});
+
+	it('renders chart card when /chart command is submitted', async () => {
+		resolveIntent.mockResolvedValue({
+			text: null,
+			activeFlow: null,
+			card: {
+				type: 'chart',
+				labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+				datasets: [{
+					label: 'Activity',
+					data: [18, 21, 19, 24, 22, 26, 23]
+				}]
+			}
+		});
+		render(Page);
+
+		const composer = getComposer();
+		await fireEvent.input(composer, { target: { value: '/chart' } });
+		await fireEvent.keyDown(composer, { key: 'Enter' });
+
+		expect(resolveIntent).toHaveBeenCalledWith('/chart');
+		expect(await screen.findByText('/chart')).toBeInTheDocument();
+		// Chart component should be rendered (it has "Activity line chart" as aria-label)
+		await waitFor(() => {
+			const chartElements = document.querySelectorAll('canvas');
+			expect(chartElements.length).toBeGreaterThan(0);
+		});
+	});
 });
