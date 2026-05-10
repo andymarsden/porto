@@ -284,7 +284,7 @@
                             bind:value={draft}
                             onkeydown={handleComposerKeydown}
                             rows="1"
-                            class="h-9 max-h-56 min-h-0 flex-1 resize-none border-0 bg-transparent px-3 py-1.5 shadow-none focus-visible:ring-0"
+                            class="h-9 max-h-56 min-h-0 flex-1 resize-none border-0 bg-transparent px-3 py-1.5 text-base shadow-none focus-visible:ring-0 md:text-sm"
                             placeholder="Type a message..."
                             aria-describedby="composer-hint"
                             disabled={isThinking}
