@@ -7,7 +7,7 @@
 
     // App components
     import AppHeader from "$lib/components/app-header.svelte";
-    import { MessageAssistant, MessageUser, MessageThinking } from "$lib/components/chat/index.js";
+    import { MessageAssistant, MessageUser, MessageThinking, MessageAlbumCard } from "$lib/components/chat/index.js";
 
     // UI components
     import { Badge } from "$lib/components/ui/badge/index.js";
@@ -81,10 +81,10 @@
                 const answers = JSON.stringify(result.answers, null, 2);
                 activeFlow = null;
 
-                return `Great, I have saved your answers:\n${answers}`;
+                return { text: `Great, I have saved your answers:\n${answers}`, card: null };
             }
 
-            return result.nextStep?.question ?? "Flow step is missing.";
+            return { text: result.nextStep?.question ?? "Flow step is missing.", card: null };
         }
 
         const intentResponse = await resolveIntent(text);
@@ -97,7 +97,10 @@
             activeFlow = normalizedIntentResponse.activeFlow;
         }
 
-        return String(normalizedIntentResponse.text ?? "Unknown command. Try /echo <message>.(from page)");
+        return {
+            text: normalizedIntentResponse.text ?? "Unknown command. Try /echo <message>.(from page)",
+            card: normalizedIntentResponse.card ?? null,
+        };
     }
 
     // async function handleUserMessage(content) {
@@ -170,10 +173,11 @@
             messages = messages.filter((msg) => msg.id !== thinkingMessage.id);
 
             //add the actual response
-            messages = [
-                ...messages,
-                createMessage("assistant", assistantResponse),
-            ];
+            const assistantMessage = createMessage("assistant", assistantResponse.text);
+            if (assistantResponse.card) {
+                assistantMessage.card = assistantResponse.card;
+            }
+            messages = [...messages, assistantMessage];
         } finally {
             isThinking = false;
         }
@@ -246,6 +250,8 @@
                 {#each messages as message (message.id)}
                     {#if message.role === "user"}
                         <MessageUser {message} {formatTimestamp} />
+                    {:else if message.role === "assistant" && message.card?.type === "album"}
+                        <MessageAlbumCard {message} />
                     {:else if message.role === "assistant"}
                         <MessageAssistant
                             {message}

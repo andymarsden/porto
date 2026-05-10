@@ -6,10 +6,11 @@
 import { commands } from "$lib/commands";
 import { startFlow  } from "$lib/flows/engine.js";
 
-function createIntentResponse(text, activeFlow = null) {
+function createIntentResponse(text, activeFlow = null, card = null) {
     return {
         text,
-        activeFlow
+        activeFlow,
+        card
     };
 }
 
@@ -68,7 +69,14 @@ export async function resolveIntent(input) {
             return createIntentResponse(`Could not queue music right now. Tried: ${music}`);
         }
 
-        return createIntentResponse(`Now playing ${result?.data?.name} by ${result?.data?.artists?.[0]?.name}`);
+        const albumCard = {
+            type: "album",
+            name: result?.data?.name ?? "Unknown album",
+            artist: result?.data?.artists?.[0]?.name ?? "Unknown artist",
+            // use the 300px image if available, fall back down the list
+            imageUrl: result?.data?.images?.[1]?.url ?? result?.data?.images?.[0]?.url ?? null,
+        };
+        return createIntentResponse(null, null, albumCard);
     }
 
     //DEMO only as basicDetails is hardcoded in the flow engine. This is to show how we can retrieve saved flow payloads via commands.
