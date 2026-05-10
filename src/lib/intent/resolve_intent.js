@@ -64,13 +64,7 @@ export async function resolveIntent(input) {
             return createIntentResponse(`Could not queue music right now. Tried: ${music}`);
         }
 
-        const albumCard = {
-            type: "album",
-            name: result?.data?.name ?? "Unknown album",
-            artist: result?.data?.artists?.[0]?.name ?? "Unknown artist",
-            // use the 300px image if available, fall back down the list
-            imageUrl: result?.data?.images?.[1]?.url ?? result?.data?.images?.[0]?.url ?? null,
-        };
+        const albumCard = commands.play.createCard(result?.data);
         return createIntentResponse(null, null, albumCard);
     }
 

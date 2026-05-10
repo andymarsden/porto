@@ -65,6 +65,15 @@ export const playCommands = {
                 error: "request_failed"
             };
         }
+    },
+    createCard(data) {
+        return {
+            type: "album",
+            name: data?.name ?? "Unknown album",
+            artist: data?.artists?.[0]?.name ?? "Unknown artist",
+            // use the 300px image if available, fall back down the list
+            imageUrl: data?.images?.[1]?.url ?? data?.images?.[0]?.url ?? null,
+        };
     }
 };
 
