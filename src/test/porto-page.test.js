@@ -15,6 +15,7 @@ vi.mock('$lib/utils.js', async () => {
 
 import Page from '../routes/(app)/sandbox/porto/+page.svelte';
 import { resolveIntent } from '$lib/intent/resolve_intent.js';
+import { wait } from '$lib/utils.js';
 
 function createDeferred() {
 	let resolve;
@@ -31,6 +32,7 @@ function getComposer() {
 describe('Porto page', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		wait.mockImplementation(() => Promise.resolve());
 	});
 
 	afterEach(() => {
@@ -92,34 +94,67 @@ describe('Porto page', () => {
 		await fireEvent.input(composer, { target: { value: '/unknown' } });
 		await fireEvent.keyDown(composer, { key: 'Enter' });
 
-		expect(await screen.findByText('Unknown command. Try /echo <message>.(from page)')).toBeInTheDocument();
+		await waitFor(() => {
+			expect(document.body.textContent).toContain('Unknown command. Try /echo <message>.(from page)');
+		});
 	});
 
-	it('renders chart card when /chart command is submitted', async () => {
+	it('streams assistant text in chunked updates before completion', async () => {
+		const streamTickResolvers = [];
+		wait.mockImplementation((ms) => {
+			if (ms === 700) {
+				return Promise.resolve();
+			}
+
+			return new Promise((resolve) => {
+				streamTickResolvers.push(resolve);
+			});
+		});
+
+		resolveIntent.mockResolvedValue('Echo: hello there friend');
+		render(Page);
+
+		const composer = getComposer();
+		await fireEvent.input(composer, { target: { value: '/echo hi' } });
+		await fireEvent.keyDown(composer, { key: 'Enter' });
+
+		await waitFor(() => {
+			expect(document.body.textContent).toContain('Echo: hello');
+		});
+		expect(document.body.textContent).not.toContain('Echo: hello there friend');
+		expect(composer).toBeDisabled();
+
+		expect(streamTickResolvers.length).toBeGreaterThan(0);
+		streamTickResolvers.shift()?.();
+
+		await waitFor(() => {
+			expect(document.body.textContent).toContain('Echo: hello there friend');
+		});
+		await waitFor(() => {
+			expect(composer).not.toBeDisabled();
+		});
+	});
+
+	it('renders album card when /play command is submitted', async () => {
 		resolveIntent.mockResolvedValue({
 			text: null,
 			activeFlow: null,
 			card: {
-				type: 'chart',
-				labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-				datasets: [{
-					label: 'Activity',
-					data: [18, 21, 19, 24, 22, 26, 23]
-				}]
+				type: 'album',
+				name: 'Comfort Eagle',
+				artist: 'CAKE',
+				imageUrl: 'https://example.com/cover.jpg'
 			}
 		});
 		render(Page);
 
 		const composer = getComposer();
-		await fireEvent.input(composer, { target: { value: '/chart' } });
+		await fireEvent.input(composer, { target: { value: '/play comfort eagle' } });
 		await fireEvent.keyDown(composer, { key: 'Enter' });
 
-		expect(resolveIntent).toHaveBeenCalledWith('/chart');
-		expect(await screen.findByText('/chart')).toBeInTheDocument();
-		// Chart component should be rendered (it has "Activity line chart" as aria-label)
-		await waitFor(() => {
-			const chartElements = document.querySelectorAll('canvas');
-			expect(chartElements.length).toBeGreaterThan(0);
-		});
+		expect(resolveIntent).toHaveBeenCalledWith('/play comfort eagle');
+		expect(await screen.findByText('/play comfort eagle')).toBeInTheDocument();
+		expect(await screen.findByText('Comfort Eagle')).toBeInTheDocument();
+		expect(await screen.findByText('CAKE')).toBeInTheDocument();
 	});
 });
