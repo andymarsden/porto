@@ -96,9 +96,11 @@ export async function resolveIntent(input) {
         return createIntentResponse(null, null, chartCard);
     }
 
-    if(text === "/barnsley")
-    {
-        return createIntentResponse("Barnsley intent hit");
+    if(text === "/barnsley" || text.startsWith("/barnsley ")) {
+        const search_string = text.replace(/^\/barnsley\s?/, "").trim()
+        const result = await commands.barnsley.search({ text: search_string });
+        const messageContent = result[0].choices[0].message.content;
+        return createIntentResponse(messageContent);
     }
     //DEMO only as basicDetails is hardcoded in the flow engine. This is to show how we can retrieve saved flow payloads via commands.
     if (text === "/flow-list") {
