@@ -1,5 +1,3 @@
-import { optimizeDeps } from "vite";
-
 export const foodFlow = {
     id: "favorite-food",
 
