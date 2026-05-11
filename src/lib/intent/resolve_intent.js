@@ -1,11 +1,12 @@
 import { commands } from "$lib/commands";
 import { startFlow } from "$lib/flows/engine.js";
 
-function createIntentResponse(text, activeFlow = null, card = null) {
+function createIntentResponse(text, activeFlow = null, card = null, options = null) {
     return {
         text,
         activeFlow,
-        card
+        card,
+        options
     };
 }
 
@@ -24,7 +25,8 @@ export async function resolveIntent(input) {
             return createIntentResponse("That flow is unavailable right now.");
         }
 
-        return createIntentResponse(activeFlow.flow.steps[0].question, activeFlow);
+        const firstStep = activeFlow.flow.steps[0];
+        return createIntentResponse(firstStep.question, activeFlow, null, firstStep.options);
         //return activeFlow.flow.steps[0].question;
     }
 
@@ -36,7 +38,8 @@ export async function resolveIntent(input) {
             return createIntentResponse("That flow is unavailable right now.");
         }
 
-        return createIntentResponse(activeFlow.flow.steps[0].question, activeFlow);
+        const firstStep = activeFlow.flow.steps[0];
+        return createIntentResponse(firstStep.question, activeFlow, null, firstStep.options);
         //return activeFlow.flow.steps[0].question;
     }
 

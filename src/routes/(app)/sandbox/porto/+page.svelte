@@ -98,6 +98,7 @@
             return {
                 text: result.nextStep?.question ?? "Flow step is missing.",
                 card: null,
+                options: result.nextStep?.options,
             };
         }
 
@@ -117,6 +118,7 @@
                 normalizedIntentResponse.text ??
                 "Unknown command. Try /echo <message>.(from page)",
             card: normalizedIntentResponse.card ?? null,
+            options: normalizedIntentResponse.options,
         };
     }
 
@@ -158,8 +160,12 @@
     //#endregion
 
     //#region Composer handlers
-    function handleOptionSelect(value) {
+    async function handleOptionSelect(value) {
         draft = value;
+        // Auto-submit the option as the user's response
+        await tick();
+        const form = document.querySelector('form');
+        form?.dispatchEvent(new Event('submit', { bubbles: true }));
     }
 
     async function handleSubmit(event) {
@@ -199,6 +205,13 @@
             const assistantMessage = createMessage("assistant", "");
             if (assistantResponse.card) {
                 assistantMessage.card = assistantResponse.card;
+            }
+            if (assistantResponse.options) {
+                assistantMessage.options = assistantResponse.options.map((opt, i) => ({
+                    id: `opt-${i}`,
+                    label: opt,
+                    value: opt,
+                }));
             }
             messages = [...messages, assistantMessage];
 
