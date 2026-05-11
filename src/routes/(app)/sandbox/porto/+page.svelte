@@ -178,7 +178,11 @@
         //Add messaged back to messages, with a user message and a "thinking..." message that we can replace later with the actual response
         messages = [
             ...messages,
-            createMessage("user", content),
+            {
+                ...createMessage("user", content),
+                // Temporary UI flag until real validation logic is wired.
+                isValidated: true,
+            },
             thinkingMessage,
         ];
 
