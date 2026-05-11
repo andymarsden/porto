@@ -12,13 +12,13 @@
 import { debugCommands } from "./debug";
 import { basicDetailsCommands } from "./basic-details";
 import { foodCommands } from "./food";
-import { playCommands } from "./play";
+import { musicCommands } from "./music";
 
 export const commands = {
     debug: debugCommands,
     basicDetails: basicDetailsCommands,
     food: foodCommands,
-    play: playCommands
+    music: musicCommands
     // note: noteCommands,
     // task: taskCommands
 };

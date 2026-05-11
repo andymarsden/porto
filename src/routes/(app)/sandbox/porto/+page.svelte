@@ -102,6 +102,7 @@
         }
 
         const intentResponse = await resolveIntent(text);
+        
         const normalizedIntentResponse =
             intentResponse && typeof intentResponse === "object"
                 ? intentResponse

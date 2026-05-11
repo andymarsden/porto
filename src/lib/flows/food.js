@@ -18,6 +18,10 @@ export const foodFlow = {
         {
             id: "japanese-food",
             question: "What is your favorite Japanese food?",
+        },
+        {
+            id: "indian-food",
+            question: "What is your favorite Indian food?",
         }
     ]
 };
