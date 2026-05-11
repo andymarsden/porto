@@ -13,5 +13,11 @@ export const foodFlow = {
             question: "What is your favorite Italian food?",
             command: "food.check"
         }
+        ,
+
+        {
+            id: "japanese-food",
+            question: "What is your favorite Japanese food?",
+        }
     ]
 };
