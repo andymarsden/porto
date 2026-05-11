@@ -48,7 +48,7 @@ export function getCurrentFlowStep(activeFlow) {
 
     return activeFlow.flow.steps[activeFlow.currentStep] ?? null;
 }
-
+ 
 export async function saveFlowAnswer(activeFlow, answer) {
 
     //run beforecommand for current step if exists
