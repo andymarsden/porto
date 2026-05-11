@@ -1,10 +1,5 @@
-//TODO
-//can you o one more pass to make the command handling even cleaner by extracting each command (/onboard, /food, /echo, etc.) into a small command map so resolveIntent becomes mostly lookup + dispatch
-
-
-
 import { commands } from "$lib/commands";
-import { startFlow  } from "$lib/flows/engine.js";
+import { startFlow } from "$lib/flows/engine.js";
 
 function createIntentResponse(text, activeFlow = null, card = null) {
     return {
@@ -21,7 +16,7 @@ export async function resolveIntent(input) {
         return createIntentResponse("Please enter a message.");
     }
 
-    if(text === "/onboard") {  
+    if (text === "/onboard") {
         console.log("Starting onboarding flow...");
         const activeFlow = await startFlow("basic-details");
 
@@ -33,7 +28,7 @@ export async function resolveIntent(input) {
         //return activeFlow.flow.steps[0].question;
     }
 
-    if(text === "/food") {  
+    if (text === "/food") {
         //console.log("Starting food flow...");
         const activeFlow = await startFlow("favorite-food");
         //console.log("From: resolveIntent - Active Flow", activeFlow);
@@ -51,26 +46,41 @@ export async function resolveIntent(input) {
 
     if (text === "/echo" || text.startsWith("/echo ")) {
         const echoText = text.replace(/^\/echo\s?/, "").trim();
-        const echoResponse = await commands.debug.echo({ name: "PortoUser",  text: echoText });
+
+        const echoResponse = await commands.debug.echo({ name: "PortoUser", text: echoText });
+
+
         return createIntentResponse(echoResponse);
         //return await commands.debug.echo({ name: "PortoUser",  text: echoText });
     }
 
-    if (text === "/play" || text.startsWith("/play ")) {
-        const music = text.replace(/^\/play\s?/, "").trim() || "random";
-        const result = await commands.play.enqueue({ music });
+    if (text === "/music" || text.startsWith("/music ")) {
+        const music = text.replace(/^\/music\s?/, "").trim() || "random";
+
+        if (music === "stop") {
+            //Stop Music
+
+            //https://infojam.app.n8n.cloud/webhook/9090ff2d-034d-46b9-a683-c3056ad10246
+
+            const result = await commands.music.stop();
+            console.log("[resolveIntent] Music stop command result:", result);
+
+
+            if (result?.ok === true) {
+                return createIntentResponse("Music stopped.");
+            }
+            else {
+                return createIntentResponse("Unfortunately stopping music is not wired yet in this sandbox. Try /music stop to see the intended flow, but the command will fail for now. Sorry about that!");
+            }
+        }
+
+        const result = await commands.music.enqueue({ music });
 
         if (!result?.ok) {
             return createIntentResponse(`Could not queue music right now. Tried: ${music}`);
         }
 
-        const albumCard = {
-            type: "album",
-            name: result?.data?.name ?? "Unknown album",
-            artist: result?.data?.artists?.[0]?.name ?? "Unknown artist",
-            // use the 300px image if available, fall back down the list
-            imageUrl: result?.data?.images?.[1]?.url ?? result?.data?.images?.[0]?.url ?? null,
-        };
+        const albumCard = commands.music.createCard(result?.data);
         return createIntentResponse(null, null, albumCard);
     }
 
@@ -86,6 +96,12 @@ export async function resolveIntent(input) {
         return createIntentResponse(null, null, chartCard);
     }
 
+    if(text === "/barnsley" || text.startsWith("/barnsley ")) {
+        const search_string = text.replace(/^\/barnsley\s?/, "").trim()
+        const result = await commands.barnsley.search({ text: search_string });
+        const messageContent = result[0].choices[0].message.content;
+        return createIntentResponse(messageContent);
+    }
     //DEMO only as basicDetails is hardcoded in the flow engine. This is to show how we can retrieve saved flow payloads via commands.
     if (text === "/flow-list") {
         const latestFlow = await commands.basicDetails.getLastSavedFlow();

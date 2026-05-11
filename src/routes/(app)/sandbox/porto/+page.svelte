@@ -29,10 +29,13 @@
     } from "$lib/flows/engine.js";
     import { persistCompletedFlow } from "$lib/flows/persistence.js";
     import { resolveIntent } from "$lib/intent/resolve_intent.js";
+    import { streamTextByWords } from "$lib/utils/streaming.js";
     import { formatTimestamp, wait, generateId } from "$lib/utils.js";
 
     //#region Layout limits
     const MAX_TEXTAREA_HEIGHT = 224;
+    const ASSISTANT_STREAM_WORDS_PER_CHUNK = 2;
+    const ASSISTANT_STREAM_DELAY_MS = 40;
     //#endregion
 
     //#region Conversation state
@@ -99,6 +102,7 @@
         }
 
         const intentResponse = await resolveIntent(text);
+        
         const normalizedIntentResponse =
             intentResponse && typeof intentResponse === "object"
                 ? intentResponse
@@ -175,7 +179,11 @@
         //Add messaged back to messages, with a user message and a "thinking..." message that we can replace later with the actual response
         messages = [
             ...messages,
-            createMessage("user", content),
+            {
+                ...createMessage("user", content),
+                // Temporary UI flag until real validation logic is wired.
+                isValidated: true,
+            },
             thinkingMessage,
         ];
 
@@ -187,15 +195,24 @@
             //remove the "thinking..." message
             messages = messages.filter((msg) => msg.id !== thinkingMessage.id);
 
-            //add the actual response
-            const assistantMessage = createMessage(
-                "assistant",
-                assistantResponse.text,
-            );
+            //add the assistant message shell, then stream text into it
+            const assistantMessage = createMessage("assistant", "");
             if (assistantResponse.card) {
                 assistantMessage.card = assistantResponse.card;
             }
             messages = [...messages, assistantMessage];
+
+            await streamTextByWords(assistantResponse.text, {
+                wordsPerChunk: ASSISTANT_STREAM_WORDS_PER_CHUNK,
+                delayMs: ASSISTANT_STREAM_DELAY_MS,
+                onChunk: (nextContent) => {
+                    messages = messages.map((msg) =>
+                        msg.id === assistantMessage.id
+                            ? { ...msg, content: nextContent }
+                            : msg,
+                    );
+                },
+            });
         } finally {
             isThinking = false;
         }

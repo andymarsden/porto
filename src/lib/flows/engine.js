@@ -48,7 +48,7 @@ export function getCurrentFlowStep(activeFlow) {
 
     return activeFlow.flow.steps[activeFlow.currentStep] ?? null;
 }
-
+ 
 export async function saveFlowAnswer(activeFlow, answer) {
 
     //run beforecommand for current step if exists
@@ -65,6 +65,9 @@ export async function saveFlowAnswer(activeFlow, answer) {
     }
 
     const normalizedAnswer = String(answer ?? "").trim();
+
+
+
     const answers = {
         ...activeFlow.answers,
         [currentStep.id]: normalizedAnswer
@@ -74,11 +77,13 @@ export async function saveFlowAnswer(activeFlow, answer) {
 
     if (currentStep?.command) {
         try {
-            await executeCommand(currentStep.command, {
+            var result = await executeCommand(currentStep.command, {
                 answer: normalizedAnswer,
                 stepId: currentStep.id,
                 answers
             });
+        console.log(`[flows.engine] Command result for flow id: ${activeFlow.id}, step id: ${currentStep.id}`, result);
+            
         } catch (error) {
             console.warn(`[flows.engine] Step command failed for flow id: ${activeFlow.id}, step id: ${currentStep.id}`, error);
         }
