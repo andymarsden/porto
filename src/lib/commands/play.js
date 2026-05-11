@@ -35,12 +35,12 @@ export const playCommands = {
                 responseBody = null;
             }
 
-            console.log("[play.enqueue] API response", {
-                endpoint,
-                payload,
-                status: response.status,
-                returned: responseBody
-            });
+            // console.log("[play.enqueue] API response", {
+            //     endpoint,
+            //     payload,
+            //     status: response.status,
+            //     returned: responseBody
+            // });
 
             if (!response.ok) {
                 return {

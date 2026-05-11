@@ -99,10 +99,10 @@
         }
 
         const intentResponse = await resolveIntent(text);
-        const normalizedIntentResponse =
-            intentResponse && typeof intentResponse === "object"
-                ? intentResponse
-                : { text: intentResponse, activeFlow: null };
+        const normalizedIntentResponse = intentResponse;
+            // intentResponse && typeof intentResponse === "object"
+            //     ? intentResponse
+            //     : { text: intentResponse, activeFlow: null };
 
         if (normalizedIntentResponse.activeFlow) {
             activeFlow = normalizedIntentResponse.activeFlow;
