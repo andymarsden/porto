@@ -41,12 +41,15 @@ export async function startFlow(id) {
     };
 }
 
-export function getCurrentFlowStep(activeFlow) {
+export function getCurrentFlowStep(activeFlow, preText = "", postText = "", replaceText = "") {
     if (!activeFlow?.flow?.steps?.length) {
         return null;
     }
 
-    return activeFlow.flow.steps[activeFlow.currentStep] ?? null;
+    const currentStep = activeFlow.flow.steps[activeFlow.currentStep];
+    currentStep.question = `${preText}${currentStep.question}${postText}` // Dont need the replace yet,.replace("{replace}", replaceText);
+
+    return currentStep;
 }
  
 export async function saveFlowAnswer(activeFlow, answer) {
@@ -75,6 +78,9 @@ export async function saveFlowAnswer(activeFlow, answer) {
 
     // run current step command if exists - this is a kind of validate command etc.
 
+    let pre_text = "";
+    let post_text = "";
+
     if (currentStep?.command) {
         try {
             var result = await executeCommand(currentStep.command, {
@@ -82,10 +88,13 @@ export async function saveFlowAnswer(activeFlow, answer) {
                 stepId: currentStep.id,
                 answers
             });
-        console.log(`[flows.engine] Command result for flow id: ${activeFlow.id}, step id: ${currentStep.id}`, result);
-            
+        
+        // If the command returns a pre_text, we can use it to modify the next question or for other purposes in the flow.
+        pre_text = result?.pre_text ?? "";
+        // Similarly, if the command returns a post_text, we can use it to add additional information after the question.
+        post_text = result?.post_text ?? "";
         } catch (error) {
-            console.warn(`[flows.engine] Step command failed for flow id: ${activeFlow.id}, step id: ${currentStep.id}`, error);
+            //console.warn(`[flows.engine] Step command failed for flow id: ${activeFlow.id}, step id: ${currentStep.id}`, error);
         }
     }
 
@@ -110,7 +119,7 @@ export async function saveFlowAnswer(activeFlow, answer) {
 
     return {
         activeFlow: nextFlow,
-        nextStep: getCurrentFlowStep(nextFlow),
+        nextStep: getCurrentFlowStep(nextFlow, pre_text,post_text),
         isComplete: nextFlow.currentStep >= nextFlow.flow.steps.length,
         answers: nextFlow.answers
     };
