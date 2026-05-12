@@ -20,7 +20,6 @@ The list below is auto-generated from markdown files in [docs](docs/). Run `npm 
 - [Oldchat](docs/oldchat.md)
 - [Porto Flow Process (Current)](docs/porto-flow.md)
 - [Porto](docs/porto.md)
-- [Porto Testing](docs/portotesting.md)
 - [Robots.txt Maintenance](docs/robots.md)
 <!-- docs-index:end -->
 
