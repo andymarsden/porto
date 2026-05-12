@@ -116,5 +116,10 @@ export async function resolveIntent(input) {
         return createIntentResponse(`Latest flow payload:\n${JSON.stringify(latestFlow, null, 2)}`);
     }
 
+    if(text === "/qrios"){
+        return createIntentResponse("Qrios intent hit");
+    }
+
     return createIntentResponse("Unknown command. Try /echo <message> or /flow-list (from intent).");
+
 }
