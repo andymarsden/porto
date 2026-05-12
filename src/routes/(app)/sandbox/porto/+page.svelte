@@ -149,13 +149,19 @@
     async function scrollToBottom() {
         await tick();
 
-        if (messageListRef) {
-            messageListRef.scrollTop = messageListRef.scrollHeight;
-        }
+        // if (messageListRef) {
+        //     messageListRef.scrollTop = messageListRef.scrollHeight;
+        // }
 
-        if (messageEndRef) {
-            messageEndRef.scrollIntoView({ block: "end" });
-        }
+        // if (messageEndRef) {
+        //     messageEndRef.scrollIntoView({ block: "end" });
+        // }
+
+        //No need to overcomplicate this, just scroll to the bottom of the page everytime messages update. This way we don't have to worry about which element is the scroll container, and it works even if the structure of the page changes.
+        window.scrollTo({
+  top: document.body.scrollHeight,
+  behavior: "smooth"
+});
     }
     //#endregion
 
@@ -193,6 +199,9 @@
             thinkingMessage,
         ];
 
+        // Scroll down immediately after showing the submission
+        await scrollToBottom();
+
         //#region get response and update messages
         //This entire bit will need re thinking once we have actual streaming responses, but for now this is fine as there is a new ID generated for each message, so we can easily find and replace the "thinking..." message with the actual response once it's ready
         try {
@@ -206,13 +215,6 @@
             if (assistantResponse.card) {
                 assistantMessage.card = assistantResponse.card;
             }
-            if (assistantResponse.options) {
-                assistantMessage.options = assistantResponse.options.map((opt, i) => ({
-                    id: `opt-${i}`,
-                    label: opt,
-                    value: opt,
-                }));
-            }
             messages = [...messages, assistantMessage];
 
             await streamTextByWords(assistantResponse.text, {
@@ -224,8 +226,27 @@
                             ? { ...msg, content: nextContent }
                             : msg,
                     );
+                    // Scroll to keep the streaming response visible
+                    void scrollToBottom();
                 },
             });
+
+            // add options only after streaming completes so they don't appear prematurely
+            //OPTIONS ARE SHOWN HERE!!!!
+            if (assistantResponse.options) {
+                messages = messages.map((msg) =>
+                    msg.id === assistantMessage.id
+                        ? {
+                              ...msg,
+                              options: assistantResponse.options.map((opt, i) => ({
+                                  id: `opt-${i}`,
+                                  label: opt,
+                                  value: opt,
+                              })),
+                          }
+                        : msg,
+                );
+            }
         } finally {
             isThinking = false;
         }
@@ -296,7 +317,9 @@
             >
                 {#each messages as message (message.id)}
                     {#if message.role === "user"}
-                        <MessageUser {message} {formatTimestamp} />
+                        <div class="pb-12">
+                            <MessageUser {message} {formatTimestamp} />
+                        </div>
                     {:else if message.role === "assistant" && message.card?.type === "album"}
                         <MessageAlbumCard {message} />
                     {:else if message.role === "assistant" && message.card?.type === "chart"}
