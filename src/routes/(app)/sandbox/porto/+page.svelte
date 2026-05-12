@@ -13,6 +13,7 @@
         MessageThinking,
         MessageAlbumCard,
         MessageChart,
+        VegaChart,
     } from "$lib/components/chat/index.js";
 
     // UI components
@@ -103,7 +104,7 @@
         }
 
         const intentResponse = await resolveIntent(text);
-        
+
         const normalizedIntentResponse =
             intentResponse && typeof intentResponse === "object"
                 ? intentResponse
@@ -121,14 +122,6 @@
             options: normalizedIntentResponse.options,
         };
     }
-
-    // async function handleUserMessage(content) {
-    //     if (activeFlow) {
-    //         return handleFlowAnswer(content);
-    //     }
-
-    //     return resolveIntent(content);
-    // }
 
     //#endregion
 
@@ -148,20 +141,11 @@
 
     async function scrollToBottom() {
         await tick();
-
-        // if (messageListRef) {
-        //     messageListRef.scrollTop = messageListRef.scrollHeight;
-        // }
-
-        // if (messageEndRef) {
-        //     messageEndRef.scrollIntoView({ block: "end" });
-        // }
-
         //No need to overcomplicate this, just scroll to the bottom of the page everytime messages update. This way we don't have to worry about which element is the scroll container, and it works even if the structure of the page changes.
         window.scrollTo({
-  top: document.body.scrollHeight,
-  behavior: "smooth"
-});
+            top: document.body.scrollHeight,
+            behavior: "smooth",
+        });
     }
     //#endregion
 
@@ -170,8 +154,8 @@
         draft = value;
         // Auto-submit the option as the user's response
         await tick();
-        const form = document.querySelector('form');
-        form?.dispatchEvent(new Event('submit', { bubbles: true }));
+        const form = document.querySelector("form");
+        form?.dispatchEvent(new Event("submit", { bubbles: true }));
     }
 
     async function handleSubmit(event) {
@@ -238,11 +222,13 @@
                     msg.id === assistantMessage.id
                         ? {
                               ...msg,
-                              options: assistantResponse.options.map((opt, i) => ({
-                                  id: `opt-${i}`,
-                                  label: opt,
-                                  value: opt,
-                              })),
+                              options: assistantResponse.options.map(
+                                  (opt, i) => ({
+                                      id: `opt-${i}`,
+                                      label: opt,
+                                      value: opt,
+                                  }),
+                              ),
                           }
                         : msg,
                 );
@@ -324,6 +310,8 @@
                         <MessageAlbumCard {message} />
                     {:else if message.role === "assistant" && message.card?.type === "chart"}
                         <MessageChart {message} />
+                        <!-- {:else if message.role === "assistant" && message.card?.type === "chart"}
+                        <VegaChart {message} />  -->
                     {:else if message.role === "assistant"}
                         <MessageAssistant
                             {message}
