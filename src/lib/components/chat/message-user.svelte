@@ -28,6 +28,7 @@
 					</svg>
 				</span>
 			{/if}
+			<!-- <p class="text-muted-foreground text-[11px]">Andy • {formatTimestamp(message.createdAt)}  •  <a href="#"><u>edit</u></a></p> -->
 			<p class="text-muted-foreground text-[11px]">Andy • {formatTimestamp(message.createdAt)}</p>
 		</div>
 	</div>

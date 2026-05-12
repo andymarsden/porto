@@ -45,7 +45,7 @@ export const foodCommands = {
         console.info("[food.politeResponse] Payload:", payload);
         userAnswer.text = payload.answer?.toLowerCase() ?? "";
         //add a line break in the string below
-        userAnswer.pre_text = `You said your favorite Chinese food is ${userAnswer.text}.\n\n`;
+        userAnswer.pre_text = `# Title **sadasasd You said your favorite Chinese food** is ${userAnswer.text}.\n\n`;
         userAnswer.post_text = "";
         return userAnswer;
     }

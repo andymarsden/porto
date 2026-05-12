@@ -47,7 +47,9 @@ describe('Porto page', () => {
 		await fireEvent.input(composer, { target: { value: '/echo hello' } });
 		await fireEvent.keyDown(composer, { key: 'Enter' });
 
-		expect(resolveIntent).toHaveBeenCalledWith('/echo hello');
+		await waitFor(() => {
+			expect(resolveIntent).toHaveBeenCalledWith('/echo hello');
+		});
 		expect(await screen.findByText('/echo hello')).toBeInTheDocument();
 		expect(await screen.findByText('Echo: hello')).toBeInTheDocument();
 		expect(screen.queryByLabelText('Assistant is thinking')).not.toBeInTheDocument();
@@ -152,9 +154,57 @@ describe('Porto page', () => {
 		await fireEvent.input(composer, { target: { value: '/play comfort eagle' } });
 		await fireEvent.keyDown(composer, { key: 'Enter' });
 
-		expect(resolveIntent).toHaveBeenCalledWith('/play comfort eagle');
+		await waitFor(() => {
+			expect(resolveIntent).toHaveBeenCalledWith('/play comfort eagle');
+		});
 		expect(await screen.findByText('/play comfort eagle')).toBeInTheDocument();
 		expect(await screen.findByText('Comfort Eagle')).toBeInTheDocument();
 		expect(await screen.findByText('CAKE')).toBeInTheDocument();
+	});
+
+	it('renders assistant markdown content', async () => {
+		resolveIntent.mockResolvedValue('Use **bold** formatting.');
+		render(Page);
+
+		const composer = getComposer();
+		await fireEvent.input(composer, { target: { value: '/echo markdown' } });
+		await fireEvent.keyDown(composer, { key: 'Enter' });
+
+		await waitFor(() => {
+			expect(resolveIntent).toHaveBeenCalledWith('/echo markdown');
+		});
+		const strongText = await screen.findByText('bold', { selector: 'strong' });
+		expect(strongText).toBeInTheDocument();
+		expect(strongText).toHaveTextContent('bold');
+	});
+
+	it('renders markdown headings as heading elements', async () => {
+		resolveIntent.mockResolvedValue('## Summary heading');
+		render(Page);
+
+		const composer = getComposer();
+		await fireEvent.input(composer, { target: { value: '/echo heading' } });
+		await fireEvent.keyDown(composer, { key: 'Enter' });
+
+		await waitFor(() => {
+			expect(resolveIntent).toHaveBeenCalledWith('/echo heading');
+		});
+		expect(await screen.findByRole('heading', { name: 'Summary heading', level: 2 })).toBeInTheDocument();
+	});
+
+	it('escapes raw HTML in assistant markdown content', async () => {
+		resolveIntent.mockResolvedValue('Hi <script>alert("x")</script> there');
+		render(Page);
+
+		const composer = getComposer();
+		await fireEvent.input(composer, { target: { value: '/echo html' } });
+		await fireEvent.keyDown(composer, { key: 'Enter' });
+
+		await waitFor(() => {
+			expect(document.body.textContent).toContain('<script>alert("x")</script>');
+		});
+
+		const conversation = screen.getByLabelText('Conversation');
+		expect(conversation.querySelector('script')).toBeNull();
 	});
 });

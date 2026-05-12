@@ -41,6 +41,7 @@
 	},
 	"dependencies": {
 		"chart.js": "^4.5.1",
+		"marked": "^18.0.3",
 		"svelte-chartjs": "^4.0.1"
 	}
 }
