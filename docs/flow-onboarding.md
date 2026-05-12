@@ -30,7 +30,8 @@ export const myFlow = {
         {
             id: "step-two",
             question: "What is your second answer?",
-            command: "myFlow.check"  // optional, runs after user input
+            validate: "myFlow.validateStepTwo", // optional, runs immediately on submit
+            command: "myFlow.check"  // optional, runs after validation passes
         }
     ]
 };
@@ -92,6 +93,16 @@ export const myFlowCommands = {
         };
     },
 
+    // Optional: Runs before moving to the next step (if step has validate)
+    async validateStepTwo(payload) {
+        const valid = payload.answer.length >= 3;
+
+        return {
+            ok: valid,
+            message: valid ? undefined : "Please enter at least 3 characters."
+        };
+    },
+
     // Required: Runs when flow completes
     async saveFlow({ answers }) {
         const submission = {
@@ -120,10 +131,24 @@ export const myFlowCommands = {
 
 **Key points:**
 - `setup(payload)` is called at flow start if the first step has `setupCommand`.
-- `check(payload)` is called after each step if that step has `command`.
+- `validate(payload)` style handlers are called immediately after submit if a step has `validate`.
+- `check(payload)` is called after each step only when validation passes (or when no validate hook is set).
 - `saveFlow({ answers })` is called when the flow completes (required).
 - All commands should return an object or reject with an error; errors are caught and logged without breaking the flow.
 - Command payload includes `answers`, which is a merged object of all answers collected so far (including current input).
+
+### Validation Return Shapes
+
+Validation is treated as failed when any of these are returned:
+- `false`
+- `{ ok: false }`
+- `{ valid: false }`
+- a thrown error
+
+On validation failure:
+- the current question does not advance
+- the answer is not saved to flow state
+- the user sees either `message`, `error`, or fallback text: "Invalid answer, please try again."
 
 ### 4. Register Commands
 

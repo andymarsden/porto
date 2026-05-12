@@ -207,4 +207,40 @@ describe('Porto page', () => {
 		const conversation = screen.getByLabelText('Conversation');
 		expect(conversation.querySelector('script')).toBeNull();
 	});
+
+	it('shows validation error and keeps flow on same question until retry succeeds', async () => {
+		resolveIntent.mockResolvedValue({
+			text: 'What is your favorite food?',
+			activeFlow: {
+				id: 'favorite-food',
+				currentStep: 0,
+				answers: {},
+				flow: {
+					steps: [
+						{ id: 'food', question: 'What is your favorite food?', validate: 'food.check' },
+						{ id: 'color', question: 'What is your favorite color?' }
+					]
+				}
+			}
+		});
+
+		render(Page);
+
+		const composer = getComposer();
+		await fireEvent.input(composer, { target: { value: '/start-flow' } });
+		await fireEvent.keyDown(composer, { key: 'Enter' });
+
+		expect(await screen.findByText('What is your favorite food?')).toBeInTheDocument();
+
+		await fireEvent.input(composer, { target: { value: 'pineapple pizza' } });
+		await fireEvent.keyDown(composer, { key: 'Enter' });
+
+		expect(await screen.findByText('Pineapple pizza is not allowed here. Please choose another food.')).toBeInTheDocument();
+		expect(screen.queryByText('What is your favorite color?')).not.toBeInTheDocument();
+
+		await fireEvent.input(composer, { target: { value: 'dumplings' } });
+		await fireEvent.keyDown(composer, { key: 'Enter' });
+
+		expect(await screen.findByText('What is your favorite color?')).toBeInTheDocument();
+	});
 });

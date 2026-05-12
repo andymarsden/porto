@@ -85,6 +85,13 @@
             const result = await saveFlowAnswer(activeFlow, text);
             activeFlow = result.activeFlow;
 
+            if (result.errorMessage) {
+                return {
+                    text: result.errorMessage,
+                    card: null,
+                };
+            }
+
             if (result.isComplete) {
                 await persistCompletedFlow(activeFlow.id, result.answers);
                 const answers = JSON.stringify(result.answers, null, 2);

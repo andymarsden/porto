@@ -13,7 +13,7 @@ export const foodFlow = {
         {
             id: "italian-food",
             question: "What is your favorite Italian food?",
-            command: "food.check",
+            validate: "food.check",
             options:["Pizza", "Pasta", "Lasagna"]
         },
         {

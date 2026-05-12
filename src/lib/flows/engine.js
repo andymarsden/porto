@@ -12,6 +12,10 @@ function getSetupCommand(step) {
     return step?.setupCommand ?? step?.setup_command ?? null;
 }
 
+function getValidateCommand(step) {
+    return step?.validate ?? step?.validateCommand ?? step?.validate_command ?? null;
+}
+
 export async function startFlow(id) {
     const flow = flowRegistry[id];
 
@@ -72,12 +76,51 @@ export async function saveFlowAnswer(activeFlow, answer) {
 
     const normalizedAnswer = String(answer ?? "").trim();
 
-
-
-    const answers = {
+    const candidateAnswers = {
         ...activeFlow.answers,
         [currentStep.id]: normalizedAnswer
     };
+
+    //VALIDATION PROCESS
+    const validateCommand = getValidateCommand(currentStep);
+
+    if (validateCommand) {
+        try {
+            const validationResult = await executeCommand(validateCommand, {
+                answer: normalizedAnswer,
+                stepId: currentStep.id,
+                answers: candidateAnswers
+            });
+
+            const isValidationFailure =
+                validationResult === false ||
+                validationResult?.ok === false ||
+                validationResult?.valid === false;
+
+            if (isValidationFailure) {
+                return {
+                    activeFlow,
+                    nextStep: getCurrentFlowStep(activeFlow),
+                    isComplete: false,
+                    answers: activeFlow.answers,
+                    errorMessage:
+                        validationResult?.message ??
+                        validationResult?.error ??
+                        "Invalid answer, please try again."
+                };
+            }
+        } catch (error) {
+            return {
+                activeFlow,
+                nextStep: getCurrentFlowStep(activeFlow),
+                isComplete: false,
+                answers: activeFlow.answers,
+                errorMessage: error?.message ?? "Invalid answer, please try again."
+            };
+        }
+    }
+
+    const answers = candidateAnswers;
 
     // run current step command if exists - this is a kind of validate command etc.
 
@@ -86,7 +129,7 @@ export async function saveFlowAnswer(activeFlow, answer) {
 
     if (currentStep?.command) {
         try {
-            var result = await executeCommand(currentStep.command, {
+            const result = await executeCommand(currentStep.command, {
                 answer: normalizedAnswer,
                 stepId: currentStep.id,
                 answers
@@ -97,7 +140,7 @@ export async function saveFlowAnswer(activeFlow, answer) {
         // Similarly, if the command returns a post_text, we can use it to add additional information after the question.
         post_text = result?.post_text ?? "";
         } catch (error) {
-            //console.warn(`[flows.engine] Step command failed for flow id: ${activeFlow.id}, step id: ${currentStep.id}`, error);
+            console.warn(`[flows.engine] Step command failed for flow id: ${activeFlow.id}, step id: ${currentStep.id}`, error);
         }
     }
 
