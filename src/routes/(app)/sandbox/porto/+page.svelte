@@ -146,16 +146,22 @@
             textareaRef.scrollHeight > MAX_TEXTAREA_HEIGHT ? "auto" : "hidden";
     }
 
-    async function scrollToBottom() {
+        async function scrollToBottom() {
         await tick();
-
-        if (messageListRef) {
-            messageListRef.scrollTop = messageListRef.scrollHeight;
-        }
-
-        if (messageEndRef) {
-            messageEndRef.scrollIntoView({ block: "end" });
-        }
+ 
+        // if (messageListRef) {
+        //     messageListRef.scrollTop = messageListRef.scrollHeight;
+        // }
+ 
+        // if (messageEndRef) {
+        //     messageEndRef.scrollIntoView({ block: "end" });
+        // }
+ 
+        //No need to overcomplicate this, just scroll to the bottom of the page everytime messages update. This way we don't have to worry about which element is the scroll container, and it works even if the structure of the page changes.
+        window.scrollTo({
+  top: document.body.scrollHeight,
+  behavior: "smooth"
+});
     }
     //#endregion
 
