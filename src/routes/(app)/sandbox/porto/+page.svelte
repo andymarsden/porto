@@ -206,13 +206,6 @@
             if (assistantResponse.card) {
                 assistantMessage.card = assistantResponse.card;
             }
-            if (assistantResponse.options) {
-                assistantMessage.options = assistantResponse.options.map((opt, i) => ({
-                    id: `opt-${i}`,
-                    label: opt,
-                    value: opt,
-                }));
-            }
             messages = [...messages, assistantMessage];
 
             await streamTextByWords(assistantResponse.text, {
@@ -226,6 +219,23 @@
                     );
                 },
             });
+
+            // add options only after streaming completes so they don't appear prematurely
+            //OPTIONS ARE SHOWN HERE!!!!
+            if (assistantResponse.options) {
+                messages = messages.map((msg) =>
+                    msg.id === assistantMessage.id
+                        ? {
+                              ...msg,
+                              options: assistantResponse.options.map((opt, i) => ({
+                                  id: `opt-${i}`,
+                                  label: opt,
+                                  value: opt,
+                              })),
+                          }
+                        : msg,
+                );
+            }
         } finally {
             isThinking = false;
         }

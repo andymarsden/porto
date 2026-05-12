@@ -47,6 +47,9 @@ export function getCurrentFlowStep(activeFlow, preText = "", postText = "", repl
     }
 
     const currentStep = activeFlow.flow.steps[activeFlow.currentStep];
+    if (!currentStep) {
+        return null;
+    }
     currentStep.question = `${preText}${currentStep.question}${postText}` // Dont need the replace yet,.replace("{replace}", replaceText);
 
     return currentStep;
