@@ -48,6 +48,14 @@
 						/>
 					</svg>
 				</span>
+			{:else if message.isValidated === null}
+				<span
+					class="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-gray-400 text-white"
+					aria-label="Validation pending"
+					title="Validation pending"
+				>
+					<span class="h-1.5 w-1.5 rounded-full bg-white" aria-hidden="true"></span>
+				</span>
 			{/if}
 			<!-- <p class="text-muted-foreground text-[11px]">Andy • {formatTimestamp(message.createdAt)}  •  <a href="#"><u>edit</u></a></p> -->
 			<p class="text-muted-foreground text-[11px]">Andy • {formatTimestamp(message.createdAt)}</p>

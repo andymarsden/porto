@@ -179,12 +179,14 @@
         isThinking = true;
 
         let thinkingMessage = createMessage("thinking", "thinking...");
+        const isFlowSubmission = Boolean(activeFlow);
 
         draft = "";
 
         //Add messaged back to messages, with a user message and a "thinking..." message that we can replace later with the actual response
         const userMessage = {
             ...createMessage("user", content),
+            isValidated: isFlowSubmission ? null : undefined,
         };
 
         messages = [
