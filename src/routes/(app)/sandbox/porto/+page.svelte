@@ -89,6 +89,7 @@
                 return {
                     text: result.errorMessage,
                     card: null,
+                    isValidated: false,
                 };
             }
 
@@ -100,6 +101,7 @@
                 return {
                     text: `Great, I have saved your answers:\n${answers}`,
                     card: null,
+                    isValidated: true,
                 };
             }
 
@@ -107,6 +109,7 @@
                 text: result.nextStep?.question ?? "Flow step is missing.",
                 card: null,
                 options: result.nextStep?.options,
+                isValidated: true,
             };
         }
 
@@ -180,13 +183,13 @@
         draft = "";
 
         //Add messaged back to messages, with a user message and a "thinking..." message that we can replace later with the actual response
+        const userMessage = {
+            ...createMessage("user", content),
+        };
+
         messages = [
             ...messages,
-            {
-                ...createMessage("user", content),
-                // Temporary UI flag until real validation logic is wired.
-                isValidated: true,
-            },
+            userMessage,
             thinkingMessage,
         ];
 
@@ -200,6 +203,14 @@
 
             //remove the "thinking..." message
             messages = messages.filter((msg) => msg.id !== thinkingMessage.id);
+
+            if (typeof assistantResponse.isValidated === "boolean") {
+                messages = messages.map((msg) =>
+                    msg.id === userMessage.id
+                        ? { ...msg, isValidated: assistantResponse.isValidated }
+                        : msg,
+                );
+            }
 
             //add the assistant message shell, then stream text into it
             const assistantMessage = createMessage("assistant", "");
