@@ -86,4 +86,15 @@
 	:global(.assistant-markdown a) {
 		text-decoration: underline;
 	}
+
+	:global(.assistant-markdown hr) {
+		margin: 0.9rem 0;
+		border: 0;
+		border-top: 1px solid color-mix(in oklab, currentColor 28%, transparent);
+	}
+
+	:global(.assistant-markdown em),
+	:global(.assistant-markdown i) {
+		font-style: italic;
+	}
 </style>
