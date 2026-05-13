@@ -32,7 +32,6 @@
     import { streamTextByWords } from "$lib/utils/streaming.js";
     import { formatTimestamp, wait, generateId } from "$lib/utils.js";
 
-
     //#region Layout limits
     const MAX_TEXTAREA_HEIGHT = 224;
     const ASSISTANT_STREAM_WORDS_PER_CHUNK = 2;
@@ -63,23 +62,38 @@
     }
 
     function setUpMessage() {
-//post example message as assistant
+        //post example message as assistant
         messages = [
-                ...messages,
-                {
-                    id: generateId(),
-                    role: "assistant",
-                    content: "Hello! I'm Porto, your assistant for testing flows and intents. How can I help you today?",
-                    createdAt: new Date().toISOString(),
-                    options: [
-  { id: "food", label: "Start food", value: "food",button_type:"fancy" },
-  { id: "onboard", label: "Start onboarding", value: "onboard",button_type:"secondary" },
-  { id: "music", label: "Play some music", value: "music",button_type:"primary" }
-]
-                },
-            ];
+            ...messages,
+            {
+                id: generateId(),
+                role: "assistant",
+                content:
+                    "Hello! I'm Porto, your assistant for testing flows and intents. How can I help you today?",
+                createdAt: new Date().toISOString(),
+                options: [
+                    {
+                        id: "food",
+                        label: "Check data",
+                        value: "food",
+                        button_type: "fancy",
+                    },
+                    {
+                        id: "onboard",
+                        label: "Start onboarding",
+                        value: "onboard",
+                        button_type: "secondary",
+                    },
+                    {
+                        id: "music",
+                        label: "Play some music",
+                        value: "music",
+                        button_type: "primary",
+                    },
+                ],
+            },
+        ];
     }
-
 
     function buildValidationRetryMessage(errorMessage, retryQuestion) {
         if (errorMessage && retryQuestion) {
@@ -131,7 +145,7 @@
         }
 
         const intentResponse = await resolveIntent(text);
-        
+
         const normalizedIntentResponse =
             intentResponse && typeof intentResponse === "object"
                 ? intentResponse
@@ -187,9 +201,9 @@
 
         //No need to overcomplicate this, just scroll to the bottom of the page everytime messages update. This way we don't have to worry about which element is the scroll container, and it works even if the structure of the page changes.
         window.scrollTo({
-  top: document.body.scrollHeight,
-  behavior: "smooth"
-});
+            top: document.body.scrollHeight,
+            behavior: "smooth",
+        });
     }
     //#endregion
 
@@ -198,7 +212,7 @@
         draft = value;
         // Auto-submit the option as the user's response
         await tick();
-        await handleSubmit(new Event('submit', { bubbles: true }));
+        await handleSubmit(new Event("submit", { bubbles: true }));
         // const form = document.querySelector('form');
         // form?.dispatchEvent(new Event('submit', { bubbles: true }));
     }
@@ -223,11 +237,7 @@
         draft = "";
 
         //Add messaged back to messages, with a user message and a "thinking..." message that we can replace later with the actual response
-        messages = [
-            ...messages,
-            userMessage,
-            thinkingMessage,
-        ];
+        messages = [...messages, userMessage, thinkingMessage];
 
         // Scroll down immediately after showing the submission
         await scrollToBottom();
@@ -279,11 +289,13 @@
                     msg.id === assistantMessage.id
                         ? {
                               ...msg,
-                              options: assistantResponse.options.map((opt, i) => ({
-                                  id: `opt-${i}`,
-                                  label: opt,
-                                  value: opt,
-                              })),
+                              options: assistantResponse.options.map(
+                                  (opt, i) => ({
+                                      id: `opt-${i}`,
+                                      label: opt,
+                                      value: opt,
+                                  }),
+                              ),
                           }
                         : msg,
                 );
@@ -320,7 +332,7 @@
 
     //#region Initial setup
     onMount(async () => {
-        setUpMessage()
+        setUpMessage();
         autoResizeTextarea();
         await scrollToBottom();
     });

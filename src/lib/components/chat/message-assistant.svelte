@@ -81,7 +81,7 @@
     }
 
     .glass-border-button:hover {
-        transform: translateY(-1px);
+        /* transform: translateY(-1px); */
         background: var(--glass-hover);
     }
 
@@ -93,7 +93,7 @@
         border-radius: inherit;
 
         background: linear-gradient(
-            130deg,
+            122deg,
             #ff00aa,
             #ff5e5e,
             #ffdd00,
@@ -103,7 +103,7 @@
         );
 
         background-size: 400% 400%;
-        animation: borderMove 8s ease-in-out infinite;
+        animation: borderMove 16s ease-in-out infinite;
 
         mask:
             linear-gradient(#000 0 0) content-box,
