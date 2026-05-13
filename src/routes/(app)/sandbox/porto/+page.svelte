@@ -61,6 +61,25 @@
         };
     }
 
+    function setUpMessage() {
+//post example message as assistant
+        messages = [
+                ...messages,
+                {
+                    id: generateId(),
+                    role: "assistant",
+                    content: "Hello! I'm Porto, your assistant for testing flows and intents. How can I help you today?",
+                    createdAt: new Date().toISOString(),
+                    options: [
+  { id: "setup-start-flow", label: "Start a flow", value: "Start a flow" },
+  { id: "setup-test-intent", label: "Test an intent", value: "Test an intent" },
+  { id: "setup-say-hi", label: "Just say hi", value: "Just say hi" }
+]
+                },
+            ];
+    }
+
+
     function buildValidationRetryMessage(errorMessage, retryQuestion) {
         if (errorMessage && retryQuestion) {
             return `${errorMessage}\n\n${retryQuestion}`;
@@ -299,6 +318,7 @@
 
     //#region Initial setup
     onMount(async () => {
+        setUpMessage()
         autoResizeTextarea();
         await scrollToBottom();
     });
