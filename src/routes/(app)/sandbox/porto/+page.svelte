@@ -74,20 +74,6 @@
 
         await wait(700);
 
-        // if (text === "/onboard") {
-        //     activeFlow = startFlow("basic-details");
-
-        //     const step = getCurrentFlowStep(activeFlow);
-        //     return step?.question ?? "That flow is unavailable right now.";
-        // }
-
-        // if (text === "/food") {
-        //     activeFlow = startFlow("favorite-food");
-
-        //     const step = getCurrentFlowStep(activeFlow);
-        //     return step?.question ?? "That flow is unavailable right now.";
-        // }
-
         if (activeFlow) {
             const result = await saveFlowAnswer(activeFlow, text);
             activeFlow = result.activeFlow;

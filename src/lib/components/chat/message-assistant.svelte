@@ -87,6 +87,29 @@
 		text-decoration: underline;
 	}
 
+	:global(.assistant-markdown table) {
+		width: 100%;
+		border-collapse: collapse;
+		margin: 0.75rem 0;
+		font-size: 0.875rem;
+	}
+
+	:global(.assistant-markdown th),
+	:global(.assistant-markdown td) {
+		padding: 0.45rem 0.75rem;
+		border: 1px solid color-mix(in oklab, currentColor 18%, transparent);
+		text-align: left;
+	}
+
+	:global(.assistant-markdown th) {
+		font-weight: 600;
+		background: color-mix(in oklab, currentColor 6%, transparent);
+	}
+
+	:global(.assistant-markdown tbody tr:nth-child(even)) {
+		background: color-mix(in oklab, currentColor 3%, transparent);
+	}
+
 	:global(.assistant-markdown hr) {
 		margin: 0.9rem 0;
 		border: 0;
