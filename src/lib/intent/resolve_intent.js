@@ -87,8 +87,34 @@ function flowCommand(flowId) {
     };
 }
 
-// Each entry: prefix to match (without leading slash), and an async handler(args)
-// args = text after the slash prefix, already trimmed
+function findCommandMatch(text) {
+    const raw = String(text ?? "").trim();
+    if (!raw) return null;
+
+    const isSlashCommand = raw.startsWith("/");
+    const commandText = isSlashCommand ? raw.slice(1).trim() : raw;
+    if (!commandText) return null;
+
+    const [slugRaw, ...rest] = commandText.split(/\s+/);
+    const slug = String(slugRaw ?? "").toLowerCase();
+    const args = rest.join(" ").trim();
+
+    const command = COMMANDS.find(c => {
+        if (c.prefix === slug) return true;
+        return Array.isArray(c.aliases) && c.aliases.includes(slug);
+    });
+
+    if (!command) return null;
+
+    return {
+        command,
+        args
+    };
+}
+
+// Each entry: prefix to match (without leading slash), optional aliases,
+// and an async handler(args).
+// args = text after the matched prefix/alias, already trimmed.
 const COMMANDS = [
     {
         prefix: "onboard",
@@ -111,12 +137,13 @@ const COMMANDS = [
     },
     {
         prefix: "music",
+        aliases: ["play","spotify"],
         handler: async (args) => {
             const music = args || "random";
 
             if (music === "stop") {
                 const result = await commands.music.stop();
-                console.log("[resolveIntent] Music stop command result:", result);
+
                 return result?.ok === true
                     ? createIntentResponse("Music stopped.")
                     : createIntentResponse("Unfortunately stopping music is not wired yet in this sandbox.");
@@ -161,12 +188,9 @@ export async function resolveIntent(input) {
 
     if (!text) return createIntentResponse("Please enter a message.");
 
-    // Match slash commands by prefix
-    if (text.startsWith("/")) {
-        const [slug, ...rest] = text.slice(1).split(" ");
-        const args = rest.join(" ").trim();
-        const command = COMMANDS.find(c => c.prefix === slug);
-        if (command) return command.handler(args);
+    const commandMatch = findCommandMatch(text);
+    if (commandMatch) {
+        return commandMatch.command.handler(commandMatch.args);
     }
 
     // const apiIntentPayload = await fetchIntentPayloadFromApi(text);

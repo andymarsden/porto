@@ -32,6 +32,7 @@
     import { streamTextByWords } from "$lib/utils/streaming.js";
     import { formatTimestamp, wait, generateId } from "$lib/utils.js";
 
+
     //#region Layout limits
     const MAX_TEXTAREA_HEIGHT = 224;
     const ASSISTANT_STREAM_WORDS_PER_CHUNK = 2;
@@ -71,9 +72,9 @@
                     content: "Hello! I'm Porto, your assistant for testing flows and intents. How can I help you today?",
                     createdAt: new Date().toISOString(),
                     options: [
-  { id: "setup-start-flow", label: "Start a flow", value: "Start a flow" },
-  { id: "setup-test-intent", label: "Test an intent", value: "Test an intent" },
-  { id: "setup-say-hi", label: "Just say hi", value: "Just say hi" }
+  { id: "food", label: "Start food", value: "food",type:"primary" },
+  { id: "onboard", label: "Start onboarding", value: "onboard" },
+  { id: "music", label: "Play some music", value: "music" }
 ]
                 },
             ];
@@ -197,8 +198,9 @@
         draft = value;
         // Auto-submit the option as the user's response
         await tick();
-        const form = document.querySelector('form');
-        form?.dispatchEvent(new Event('submit', { bubbles: true }));
+        await handleSubmit(new Event('submit', { bubbles: true }));
+        // const form = document.querySelector('form');
+        // form?.dispatchEvent(new Event('submit', { bubbles: true }));
     }
 
     async function handleSubmit(event) {
