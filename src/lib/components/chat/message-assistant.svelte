@@ -8,27 +8,141 @@
 </script>
 
 <article class="text-foreground text-[15px] leading-7">
-	<p class="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wide">Assistant</p>
-	<div class="assistant-markdown wrap-break-word" data-testid="assistant-markdown">{@html renderedContent}</div>
+	<p
+		class="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wide"
+	>
+		Assistant
+	</p>
+	<div
+		class="assistant-markdown wrap-break-word"
+		data-testid="assistant-markdown"
+	>
+		{@html renderedContent}
+	</div>
 	{#if message.options?.length}
 		<!-- Option buttons are only rendered when the message includes an options array. -->
 		<!-- Future: real API responses can include/exclude options as needed. -->
 		<div class="mt-3 flex flex-wrap gap-2">
 			{#each message.options as option (option.id)}
-				<Button
-					variant="outline"
-					size="sm"
-					class="rounded-md cursor-pointer"
-					onclick={() => onOptionSelect?.(option.value)}
-				>
-					{option.label}
-				</Button>
+				{#if option.button_type === "fancy"}
+					<button class="glass-border-button" onclick={() => onOptionSelect?.(option.value)}> {option.label} </button>
+					
+				{:else}
+					<Button
+						variant="outline"
+						size="sm"
+						class="rounded-md cursor-pointer"
+						onclick={() => onOptionSelect?.(option.value)}
+					>
+						{option.label}
+					</Button>
+				{/if}
 			{/each}
 		</div>
 	{/if}
 </article>
 
 <style>
+	
+    :global(:root) {
+        --glass-bg: rgba(255, 255, 255, 0.7);
+        --glass-hover: rgba(255, 255, 255, 0.9);
+        --glass-text: #111;
+    }
+
+    :global(.dark) {
+        --glass-bg: rgba(255, 255, 255, 0.08);
+        --glass-hover: rgba(255, 255, 255, 0.12);
+        --glass-text: white;
+    }
+
+    .glass-border-button {
+        height: 1.9rem;
+        position: relative;
+        padding-left: 0.625rem;
+        padding-right: 0.625rem;
+        border: none;
+        border-radius: 8px;
+
+        color: var(--glass-text);
+        background: var(--glass-bg);
+
+        font-weight: 600;
+        font-size: 14px;
+
+        cursor: pointer;
+        overflow: hidden;
+
+        backdrop-filter: blur(14px);
+
+        transition:
+            transform 0.2s ease,
+            background 0.2s ease;
+    }
+
+    .glass-border-button:hover {
+        transform: translateY(-1px);
+        background: var(--glass-hover);
+    }
+
+    .glass-border-button::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        padding: 2px;
+        border-radius: inherit;
+
+        background: linear-gradient(
+            130deg,
+            #ff00aa,
+            #ff5e5e,
+            #ffdd00,
+            #ff66cc,
+            #ffee55,
+            #ff00aa
+        );
+
+        background-size: 400% 400%;
+        animation: borderMove 8s ease-in-out infinite;
+
+        mask:
+            linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+
+        mask-composite: exclude;
+
+        -webkit-mask:
+            linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+
+        -webkit-mask-composite: xor;
+    }
+
+    @keyframes borderMove {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        20% {
+            background-position: 100% 20%;
+        }
+
+        40% {
+            background-position: 80% 100%;
+        }
+
+        60% {
+            background-position: 20% 80%;
+        }
+
+        80% {
+            background-position: 120% 40%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+    }
 	:global(.assistant-markdown h1),
 	:global(.assistant-markdown h2),
 	:global(.assistant-markdown h3),

@@ -72,9 +72,9 @@
                     content: "Hello! I'm Porto, your assistant for testing flows and intents. How can I help you today?",
                     createdAt: new Date().toISOString(),
                     options: [
-  { id: "food", label: "Start food", value: "food",type:"primary" },
-  { id: "onboard", label: "Start onboarding", value: "onboard" },
-  { id: "music", label: "Play some music", value: "music" }
+  { id: "food", label: "Start food", value: "food",button_type:"fancy" },
+  { id: "onboard", label: "Start onboarding", value: "onboard",button_type:"secondary" },
+  { id: "music", label: "Play some music", value: "music",button_type:"primary" }
 ]
                 },
             ];
