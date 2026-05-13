@@ -13,7 +13,6 @@
         MessageThinking,
         MessageAlbumCard,
         MessageChart,
-        VegaChart,
     } from "$lib/components/chat/index.js";
 
     // UI components
@@ -85,14 +84,6 @@
             const result = await saveFlowAnswer(activeFlow, text);
             activeFlow = result.activeFlow;
 
-            if (result.errorMessage) {
-                return {
-                    text: result.errorMessage,
-                    card: null,
-                    isValidated: false,
-                };
-            }
-
             if (result.isComplete) {
                 await persistCompletedFlow(activeFlow.id, result.answers);
                 const answers = JSON.stringify(result.answers, null, 2);
@@ -101,7 +92,6 @@
                 return {
                     text: `Great, I have saved your answers:\n${answers}`,
                     card: null,
-                    isValidated: true,
                 };
             }
 
@@ -109,12 +99,11 @@
                 text: result.nextStep?.question ?? "Flow step is missing.",
                 card: null,
                 options: result.nextStep?.options,
-                isValidated: true,
             };
         }
 
         const intentResponse = await resolveIntent(text);
-
+        
         const normalizedIntentResponse =
             intentResponse && typeof intentResponse === "object"
                 ? intentResponse
@@ -132,6 +121,14 @@
             options: normalizedIntentResponse.options,
         };
     }
+
+    // async function handleUserMessage(content) {
+    //     if (activeFlow) {
+    //         return handleFlowAnswer(content);
+    //     }
+
+    //     return resolveIntent(content);
+    // }
 
     //#endregion
 
@@ -151,11 +148,20 @@
 
     async function scrollToBottom() {
         await tick();
+
+        // if (messageListRef) {
+        //     messageListRef.scrollTop = messageListRef.scrollHeight;
+        // }
+
+        // if (messageEndRef) {
+        //     messageEndRef.scrollIntoView({ block: "end" });
+        // }
+
         //No need to overcomplicate this, just scroll to the bottom of the page everytime messages update. This way we don't have to worry about which element is the scroll container, and it works even if the structure of the page changes.
         window.scrollTo({
-            top: document.body.scrollHeight,
-            behavior: "smooth",
-        });
+  top: document.body.scrollHeight,
+  behavior: "smooth"
+});
     }
     //#endregion
 
@@ -164,8 +170,8 @@
         draft = value;
         // Auto-submit the option as the user's response
         await tick();
-        const form = document.querySelector("form");
-        form?.dispatchEvent(new Event("submit", { bubbles: true }));
+        const form = document.querySelector('form');
+        form?.dispatchEvent(new Event('submit', { bubbles: true }));
     }
 
     async function handleSubmit(event) {
@@ -179,19 +185,17 @@
         isThinking = true;
 
         let thinkingMessage = createMessage("thinking", "thinking...");
-        const isFlowSubmission = Boolean(activeFlow);
 
         draft = "";
 
         //Add messaged back to messages, with a user message and a "thinking..." message that we can replace later with the actual response
-        const userMessage = {
-            ...createMessage("user", content),
-            isValidated: isFlowSubmission ? null : undefined,
-        };
-
         messages = [
             ...messages,
-            userMessage,
+            {
+                ...createMessage("user", content),
+                // Temporary UI flag until real validation logic is wired.
+                isValidated: true,
+            },
             thinkingMessage,
         ];
 
@@ -205,14 +209,6 @@
 
             //remove the "thinking..." message
             messages = messages.filter((msg) => msg.id !== thinkingMessage.id);
-
-            if (typeof assistantResponse.isValidated === "boolean") {
-                messages = messages.map((msg) =>
-                    msg.id === userMessage.id
-                        ? { ...msg, isValidated: assistantResponse.isValidated }
-                        : msg,
-                );
-            }
 
             //add the assistant message shell, then stream text into it
             const assistantMessage = createMessage("assistant", "");
@@ -242,13 +238,11 @@
                     msg.id === assistantMessage.id
                         ? {
                               ...msg,
-                              options: assistantResponse.options.map(
-                                  (opt, i) => ({
-                                      id: `opt-${i}`,
-                                      label: opt,
-                                      value: opt,
-                                  }),
-                              ),
+                              options: assistantResponse.options.map((opt, i) => ({
+                                  id: `opt-${i}`,
+                                  label: opt,
+                                  value: opt,
+                              })),
                           }
                         : msg,
                 );
@@ -330,8 +324,6 @@
                         <MessageAlbumCard {message} />
                     {:else if message.role === "assistant" && message.card?.type === "chart"}
                         <MessageChart {message} />
-                        <!-- {:else if message.role === "assistant" && message.card?.type === "chart"}
-                        <VegaChart {message} />  -->
                     {:else if message.role === "assistant"}
                         <MessageAssistant
                             {message}

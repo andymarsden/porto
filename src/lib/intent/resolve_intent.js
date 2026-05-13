@@ -18,7 +18,6 @@ export async function resolveIntent(input) {
     }
 
     if (text === "/onboard") {
-        console.log("Starting onboarding flow...");
         const activeFlow = await startFlow("basic-details");
 
         if (!activeFlow) {
@@ -31,9 +30,7 @@ export async function resolveIntent(input) {
     }
 
     if (text === "/food") {
-        //console.log("Starting food flow...");
         const activeFlow = await startFlow("favorite-food");
-        //console.log("From: resolveIntent - Active Flow", activeFlow);
         if (!activeFlow) {
             return createIntentResponse("That flow is unavailable right now.");
         }
@@ -62,8 +59,6 @@ export async function resolveIntent(input) {
 
         if (music === "stop") {
             //Stop Music
-
-            //https://infojam.app.n8n.cloud/webhook/9090ff2d-034d-46b9-a683-c3056ad10246
 
             const result = await commands.music.stop();
             console.log("[resolveIntent] Music stop command result:", result);
