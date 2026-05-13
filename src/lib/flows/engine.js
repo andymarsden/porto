@@ -126,6 +126,7 @@ export async function saveFlowAnswer(activeFlow, answer) {
 
     let pre_text = "";
     let post_text = "";
+    let card = null;
 
     if (currentStep?.command) {
         try {
@@ -139,6 +140,7 @@ export async function saveFlowAnswer(activeFlow, answer) {
         pre_text = result?.pre_text ?? "";
         // Similarly, if the command returns a post_text, we can use it to add additional information after the question.
         post_text = result?.post_text ?? "";
+        card = result?.card ?? null;
         } catch (error) {
             console.warn(`[flows.engine] Step command failed for flow id: ${activeFlow.id}, step id: ${currentStep.id}`, error);
         }
@@ -167,7 +169,8 @@ export async function saveFlowAnswer(activeFlow, answer) {
         activeFlow: nextFlow,
         nextStep: getCurrentFlowStep(nextFlow, pre_text,post_text),
         isComplete: nextFlow.currentStep >= nextFlow.flow.steps.length,
-        answers: nextFlow.answers
+        answers: nextFlow.answers,
+        card: card
     };
 }
 

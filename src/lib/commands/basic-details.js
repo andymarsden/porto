@@ -63,7 +63,14 @@ export const basicDetailsCommands = {
 
         let userAnswer = {};
 
-        userAnswer.pre_text = `You entered the postcode: **${payload.answer}**, which is in the ward of **${ward}**. The coordinates are: Longitude: ${longitude}, Latitude: ${latitude}.\n\n`;
+        userAnswer.pre_text = `You entered the postcode: **${payload.answer}**, which is in the ward of **${ward}**.`;
+        userAnswer.card = {
+            type: "map",
+            postcode: payload.answer,
+            ward: ward,
+            latitude: latitude,
+            longitude: longitude
+        };
         return userAnswer;
     }
 };

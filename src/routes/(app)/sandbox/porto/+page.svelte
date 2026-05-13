@@ -13,6 +13,7 @@
         MessageThinking,
         MessageAlbumCard,
         MessageChart,
+        MessageMapCard,
     } from "$lib/components/chat/index.js";
 
     // UI components
@@ -118,7 +119,7 @@
 
             return {
                 text: result.nextStep?.question ?? "Flow step is missing.",
-                card: null,
+                card: result.card ?? null,
                 options: result.nextStep?.options,
                 validationStatus: true,
             };
@@ -358,6 +359,8 @@
                         <MessageAlbumCard {message} />
                     {:else if message.role === "assistant" && message.card?.type === "chart"}
                         <MessageChart {message} />
+                    {:else if message.role === "assistant" && message.card?.type === "map"}
+                        <MessageMapCard {message} />
                     {:else if message.role === "assistant"}
                         <MessageAssistant
                             {message}
