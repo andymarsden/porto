@@ -55,12 +55,15 @@ export const basicDetailsCommands = {
                 responseBody = null;
             }
 
-            //console.log("[basic-details.getPostcodeInfo] API response",responseBody.admin_ward);
+            //console.log("[basic-details.getPostcodeInfo] API response", responseBody);
 
+            const ward = responseBody?.admin_ward ?? "unknown";
+            const longitude = responseBody?.longitude ?? responseBody?.lng ?? "unknown";
+            const latitude = responseBody?.latitude ?? responseBody?.lat ?? "unknown";
 
         let userAnswer = {};
 
-        userAnswer.pre_text = `You entered the postcode: **${payload.answer}**., which is in the ward of **${responseBody.admin_ward}**.\n\n`;
+        userAnswer.pre_text = `You entered the postcode: **${payload.answer}**, which is in the ward of **${ward}**. The coordinates are: Longitude: ${longitude}, Latitude: ${latitude}.\n\n`;
         return userAnswer;
     }
 };

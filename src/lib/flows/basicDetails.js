@@ -7,7 +7,7 @@ export const basicDetailsFlow = {
     steps: [
         {
             id: "name",
-            question: "### Details\n\n*These questions help us understand where and when the conversation is happening, and what brought someone here today. They also tell us whether this is a first visit about an issue or part of something ongoing, which helps us understand how and when support is being accessed.*\n\n---\n\n ### Questions:\n\n Which hub did you attend?"
+            question: "### Details\n\nThese questions help us understand where and when the conversation is happening, and what brought someone here today. They also tell us whether this is a first visit about an issue or part of something ongoing, which helps us understand how and when support is being accessed.\n\n---\n\n **Questions:**\n\n Which hub did you attend?"
             ,options: ["[a] Porto Hub", "[b] Porto Online", "[c] Other"]
         },
         {
@@ -27,7 +27,7 @@ export const basicDetailsFlow = {
 
         {
             id:"age-band",
-            question: "### About you\n\n*These questions help us understand who we are reaching—and who we might be missing. By collecting some simple, non-identifying information, we can make sure support is reaching people from all backgrounds, ages, and communities.*\n\n*It also helps us spot patterns in need and access, so we can improve what we do and make services more inclusive.*\n\n*You don't have to answer everything—just what you're comfortable sharing.*\n\n*We never collect names, full addresses, or anything that could identify someone.*\n\n---\n\n ### Questions:\n\n Which age band do you fall into?",
+            question: "### About you\n\nThese questions help us understand who we are reaching—and who we might be missing. By collecting some simple, non-identifying information, we can make sure support is reaching people from all backgrounds, ages, and communities.\n\nIt also helps us spot patterns in need and access, so we can improve what we do and make services more inclusive.\n\nYou don't have to answer everything—just what you're comfortable sharing.\n\nWe never collect names, full addresses, or anything that could identify someone.\n\n---\n\n **Questions:**\n\n Which age band do you fall into?",
             options: ["[a] Under 18", "[b] 18-24", "[c] 25-34", "[d] 35-44", "[e] 45-54", "[f] 55-64", "[g] 65+"]
         }
     ]
