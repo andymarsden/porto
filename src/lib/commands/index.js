@@ -14,13 +14,15 @@ import { basicDetailsCommands } from "./basic-details";
 import { foodCommands } from "./food";
 import { musicCommands } from "./music";
 import { barnsleyCommands } from "./barnsley";
+import { qriosCommands } from "./qrios";
 
 export const commands = {
     debug: debugCommands,
     basicDetails: basicDetailsCommands,
     food: foodCommands,
     music: musicCommands,
-    barnsley: barnsleyCommands
+    barnsley: barnsleyCommands,
+    qrios: qriosCommands
     // note: noteCommands,
     // task: taskCommands
 };

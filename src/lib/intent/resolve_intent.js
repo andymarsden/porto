@@ -115,9 +115,14 @@ export async function resolveIntent(input) {
 
         return createIntentResponse(`Latest flow payload:\n${JSON.stringify(latestFlow, null, 2)}`);
     }
+    // generic if statement - if text (input from user) is /qrios or starts with /qrios followed by a space.
+    if (text === "/qrios" || text.startsWith("/qrios ")) {
+        // extract the part of the text after "/qrios" and trim any extra whitespace
+        const search_string = text.replace(/^\/qrios\s?/, "").trim()
+        // locate the function in the commands folder, qrios file and insert search_string from above.
+        let response = await commands.qrios.testresponse(search_string);
 
-    if(text === "/qrios"){
-        return createIntentResponse("Qrios intent hit");
+        return createIntentResponse(response);
     }
 
     return createIntentResponse("Unknown command. Try /echo <message> or /flow-list (from intent).");
