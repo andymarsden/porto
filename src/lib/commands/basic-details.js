@@ -1,5 +1,7 @@
 import { generateId } from "$lib/utils.js";
 
+const POSTCODE_LOOKUP_API = "https://infojam.app.n8n.cloud/webhook/8b3f24d0-1cfd-457f-ab50-431eb33ab5df";
+
 const FLOW_SUBMISSIONS = [];
 
 export const basicDetailsCommands = {
@@ -24,5 +26,41 @@ export const basicDetailsCommands = {
 
     async getLastSavedFlow() {
         return FLOW_SUBMISSIONS[FLOW_SUBMISSIONS.length - 1] ?? null;
+    },
+
+    async getPostcodeInfo(payload) {
+       
+
+    //Get the postcode from the API
+    //TODO This should actually go in actions, but I'm putting it here for simplicity
+
+    let postcode = {"postcode":`${payload.answer}`};
+
+//clean postcode by removing spaces and making uppercase
+postcode.postcode = postcode.postcode.replace(/\s/g, "").toUpperCase();
+
+    const response = await fetch(POSTCODE_LOOKUP_API, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(postcode)
+            });
+
+            let responseBody = null;
+
+            try {
+                responseBody = await response.clone().json();
+            } catch {
+                responseBody = null;
+            }
+
+            //console.log("[basic-details.getPostcodeInfo] API response",responseBody.admin_ward);
+
+
+        let userAnswer = {};
+
+        userAnswer.pre_text = `You entered the postcode: **${payload.answer}**., which is in the ward of **${responseBody.admin_ward}**.\n\n`;
+        return userAnswer;
     }
 };

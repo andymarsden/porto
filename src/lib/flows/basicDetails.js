@@ -1,3 +1,5 @@
+import { command } from "$app/server";
+
 export const basicDetailsFlow = {
     id: "basic-details",
 
@@ -5,6 +7,11 @@ export const basicDetailsFlow = {
         {
             id: "name",
             question: "What is your name?"
+        },
+        {
+            id:"postcode",
+            question: "What is your postcode?",
+            command:"basicDetails.getPostcodeInfo"
         },
 
         {

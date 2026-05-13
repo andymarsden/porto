@@ -42,11 +42,25 @@ export const foodCommands = {
     },
     async politeResponse(payload) {
         let userAnswer = {};
-        console.info("[food.politeResponse] Payload:", payload);
         userAnswer.text = payload.answer?.toLowerCase() ?? "";
         //add a line break in the string below
-        userAnswer.pre_text = `# Title\n\n**sadasasd You said your favorite Chinese food** is ${userAnswer.text}.I need to highlight these ==very important words==.`;
+        userAnswer.pre_text = `# Thanks\n\n**You said your favorite Chinese food** is ${userAnswer.text}.\nI need to highlight these ==very important words==.`;
         userAnswer.post_text = "";
         return userAnswer;
+    },
+    async japaneseFoodCheck(payload) {  
+
+    const bannedFoods = ["beef"];
+    const normalizedAnswer = String(payload.answer ?? "").trim().toLowerCase();
+    const isValid = !bannedFoods.includes(normalizedAnswer);
+
+    return {
+        valid: isValid,
+        message: isValid
+            ? undefined
+            : "beef is not allowed here. Please choose another Japanese food."
+    };
+
     }
+
 };

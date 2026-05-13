@@ -19,6 +19,7 @@ export const foodFlow = {
         {
             id: "japanese-food",
             question: "What is your favorite Japanese food?",
+            validate:"food.japaneseFoodCheck"
         },
         {
             id: "indian-food",
