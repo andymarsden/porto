@@ -37,7 +37,7 @@ export const basicDetailsCommands = {
     let postcode = {"postcode":`${payload.answer}`};
 
 //clean postcode by removing spaces and making uppercase
-postcode.postcode = postcode.postcode.replace(/\s/g, "").toUpperCase();
+//postcode.postcode = postcode.postcode.replace(/\s/g, "").toUpperCase();
 
     const response = await fetch(POSTCODE_LOOKUP_API, {
                 method: "POST",
