@@ -1,9 +1,16 @@
+
 import { marked } from "marked";
 
 marked.setOptions({
 	gfm: true,
 	breaks: true,
 });
+
+// Replace ==text== with <mark>text</mark>
+function highlightMarkdown(text) {
+	// This regex matches ==something== and avoids crossing line breaks
+	return text.replace(/==([^=\n]+)==/g, '<mark>$1</mark>');
+}
 
 function escapeHtml(value) {
 	return value
@@ -15,6 +22,11 @@ function escapeHtml(value) {
 }
 
 export function renderAssistantMarkdown(content) {
-	const safeContent = escapeHtml(String(content ?? ""));
-	return marked.parse(safeContent);
+	let text = String(content ?? "");
+	// Apply highlight before escaping HTML
+	text = highlightMarkdown(text);
+	const safeContent = escapeHtml(text);
+	// Unescape <mark> tags so they render as HTML
+	const html = safeContent.replaceAll('&lt;mark&gt;', '<mark>').replaceAll('&lt;/mark&gt;', '</mark>');
+	return marked.parse(html);
 }
