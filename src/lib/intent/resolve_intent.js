@@ -5,6 +5,78 @@ function createIntentResponse(text, activeFlow = null, card = null, options = nu
     return { text, activeFlow, card, options };
 }
 
+// Set this to your API endpoint when ready.
+const INTENT_API_ENDPOINT = "https://infojam.app.n8n.cloud/webhook/7f34a391-02df-49d1-9438-400f40b56dda";
+
+function parseIntentPayload(value) {
+    if (!value) return null;
+
+    const parseAsJson = (input) => {
+        try {
+            return JSON.parse(input);
+        } catch {
+            return null;
+        }
+    };
+
+    let parsed = value;
+
+    if (typeof parsed === "string") {
+        const trimmed = parsed.trim();
+        if (!trimmed) return null;
+
+        parsed = parseAsJson(trimmed);
+
+        // Some API responses can arrive as JSON-stringified JSON.
+        if (typeof parsed === "string") {
+            parsed = parseAsJson(parsed);
+        }
+
+        // Last attempt for escaped newlines.
+        if (!parsed) {
+            parsed = parseAsJson(trimmed.replace(/\\n/g, "\n"));
+        }
+    }
+
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        return null;
+    }
+
+    return {
+        intent: String(parsed.intent ?? "").replace(/^\//, "").toLowerCase(),
+        action: String(parsed.action ?? "").toLowerCase(),
+        confidence: typeof parsed.confidence === "number" ? parsed.confidence : null,
+        entities: parsed.entities && typeof parsed.entities === "object" ? parsed.entities : {}
+    };
+}
+
+async function fetchIntentPayloadFromApi(inputText) {
+    if (!INTENT_API_ENDPOINT) return null;
+
+    try {
+        const response = await fetch(INTENT_API_ENDPOINT, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ text: inputText })
+        });
+
+        if (!response.ok) return null;
+
+        // Support either raw JSON object or text payload that contains JSON.
+        const contentType = response.headers.get("content-type") || "";
+        if (contentType.includes("application/json")) {
+            return parseIntentPayload(await response.json());
+        }
+
+        return parseIntentPayload(await response.text());
+    } catch (error) {
+        console.warn("[resolveIntent] Intent API call failed:", error);
+        return null;
+    }
+}
+
 // Returns a handler that starts a named flow and returns its first step
 function flowCommand(flowId) {
     return async () => {
@@ -96,6 +168,27 @@ export async function resolveIntent(input) {
         const command = COMMANDS.find(c => c.prefix === slug);
         if (command) return command.handler(args);
     }
+
+    // const apiIntentPayload = await fetchIntentPayloadFromApi(text);
+    // const intentPayload = apiIntentPayload ?? parseIntentPayload(input);
+    // if (intentPayload?.intent) {
+    //     const command = COMMANDS.find(c => c.prefix === intentPayload.intent);
+
+    //     if (command) {
+    //         const argsFromEntities = Object.values(intentPayload.entities)
+    //             .filter(value => typeof value === "string" || typeof value === "number")
+    //             .map(String)
+    //             .join(" ")
+    //             .trim();
+
+    //         // start-flow should start the mapped flow command with no args.
+    //         if (intentPayload.action === "start-flow") {
+    //             return command.handler("");
+    //         }
+
+    //         return command.handler(argsFromEntities);
+    //     }
+    // }
 
     // No command matched — fall through to future AI intent resolution
     return createIntentResponse("Unknown command. Try /echo <message> or /flow-list (from intent).");
