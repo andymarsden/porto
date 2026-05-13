@@ -16,6 +16,7 @@ The list below is auto-generated from markdown files in [docs](docs/). Run `npm 
 - [Documentation Workflow](docs/documentation-workflow.md)
 - [Flow Onboarding Guide](docs/flow-onboarding.md)
 - [Ideas](docs/ideas.md)
+- [Intents](docs/intents.md)
 - [Notes Prototype](docs/notes.md)
 - [Oldchat](docs/oldchat.md)
 - [Porto Flow Process (Current)](docs/porto-flow.md)
