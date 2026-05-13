@@ -2,11 +2,16 @@
 import { basicDetailsFlow } from "./basicDetails";
 import { foodFlow } from "./food";
 import { executeCommand } from "$lib/commands/execute";
+import { getCreatedFlow } from "$lib/flows/store";
 
-const flowRegistry = {
+const builtInFlowRegistry = {
     "basic-details": basicDetailsFlow,
     "favorite-food": foodFlow
 };
+
+function getFlowById(id) {
+    return builtInFlowRegistry[id] ?? getCreatedFlow(id) ?? null;
+}
 
 function getSetupCommand(step) {
     return step?.setupCommand ?? step?.setup_command ?? null;
@@ -17,7 +22,7 @@ function getValidateCommand(step) {
 }
 
 export async function startFlow(id) {
-    const flow = flowRegistry[id];
+    const flow = getFlowById(id);
 
     if (!flow) {
         return null;

@@ -54,6 +54,10 @@
 						url: "/sandbox/porto",
 					},
 					{
+						title: "Flow Creator",
+						url: "/flow-creator",
+					},
+					{
 						title: "History",
 						url: "#",
 					},

@@ -87,6 +87,26 @@ function flowCommand(flowId) {
     };
 }
 
+async function startFlowById(flowId) {
+    const normalizedFlowId = String(flowId ?? "").trim().toLowerCase();
+
+    if (!normalizedFlowId) {
+        return createIntentResponse("Please provide a flow id. Example: /run-flow my-flow");
+    }
+
+    const activeFlow = await startFlow(normalizedFlowId);
+    if (!activeFlow) {
+        return createIntentResponse(`Flow \"${normalizedFlowId}\" is unavailable right now.`);
+    }
+
+    const firstStep = activeFlow.flow.steps?.[0];
+    if (!firstStep) {
+        return createIntentResponse(`Flow \"${normalizedFlowId}\" has no steps.`);
+    }
+
+    return createIntentResponse(firstStep.question, activeFlow, null, firstStep.options);
+}
+
 function findCommandMatch(text) {
     const raw = String(text ?? "").trim();
     if (!raw) return null;
@@ -123,6 +143,11 @@ const COMMANDS = [
     {
         prefix: "food",
         handler: flowCommand("favorite-food")
+    },
+    {
+        prefix: "run-flow",
+        aliases: ["flow"],
+        handler: async (args) => startFlowById(args)
     },
     {
         prefix: "n",
