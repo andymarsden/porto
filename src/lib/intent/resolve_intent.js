@@ -122,6 +122,11 @@ const COMMANDS = [
         handler: flowCommand("basic-details")
     },
     {
+        prefix: "qrios",
+        aliases: ["start qrios","new form","wellbeingcheck"],
+        handler: flowCommand("qrios")
+    },
+    {
         prefix: "food",
         handler: flowCommand("favorite-food")
     },

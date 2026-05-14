@@ -5,7 +5,8 @@ import { executeCommand } from "$lib/commands/execute";
 
 const flowRegistry = {
     "basic-details": basicDetailsFlow,
-    "favorite-food": foodFlow
+    "favorite-food": foodFlow,
+    "qrios": foodFlow
 };
 
 const BRACKETED_OPTION_PATTERN = /^\[([a-z0-9])\]\s*(.*)$/i;

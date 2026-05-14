@@ -137,7 +137,7 @@ const colors = [
 
 <!-- <article class="text-foreground text-[15px] leading-7"> -->
   <p class="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wide">
-    QRIOS Client Trends (Mar - Apr 2026)
+    QRIOS Client Trends (Mar - May 2026)
   </p>
 
   <div class="border-border bg-muted/40 rounded-xl border p-4">
@@ -147,7 +147,7 @@ const colors = [
   </div>
 
   <!-- <div class="border-border/70 mt-3 rounded-xl border border-dashed p-4" aria-label="Chart commentary"> -->
-    <p class="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-wide">Commentary</p>
+    <p class="text-muted-foreground text-[11px] font-medium uppercase tracking-wide">Commentary (AI Generated mistakes maybe made)</p>
     <!-- {#if commentary} -->
       <div id="chart-commentary" class="assistant-markdown wrap-break-word text-foreground text-sm leading-6">
         {@html renderedCommentary}

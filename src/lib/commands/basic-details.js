@@ -54,13 +54,10 @@ export const basicDetailsCommands = {
             } catch {
                 responseBody = null;
             }
-
-            //console.log("[basic-details.getPostcodeInfo] API response",responseBody.admin_ward);
-
-
+            
         let userAnswer = {};
 
-        userAnswer.pre_text = `You entered the postcode: **${payload.answer}**., which is in the ward of **${responseBody.admin_ward}**.\n\n`;
+        userAnswer.pre_text = `You entered the postcode: **${payload.answer}**., I have saved the ward of **${responseBody.admin_ward}** rather than the postcode itself.\n\n`;
         return userAnswer;
     }
 };

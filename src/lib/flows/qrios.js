@@ -10,7 +10,7 @@ export const foodFlow = {
         {
             id:"when_attended",
             question: "When did you attend the talking point?",
-        },
+        }, 
         {
             id:"reason_for_visit",
             question: "What brought you to the talking point today?",
