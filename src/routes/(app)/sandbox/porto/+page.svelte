@@ -56,8 +56,8 @@
 
     //#region Setup
 
-    function bootstrap(){
-console.log("bootstrap - user param:", userParam);
+    function bootstrap() {
+        console.log("bootstrap - user param:", userParam);
     }
 
     function setUpMessage() {
@@ -67,8 +67,7 @@ console.log("bootstrap - user param:", userParam);
             {
                 id: generateId(),
                 role: "assistant",
-                content:
-                    `Hi ${userParam || ""}! I'm Porto, your assistant for testing flows and intents. How can I help you today?`,
+                content: `Hi ${userParam || ""}!\n I'm Porto, your STAT assistant. How can I help you today?`,
                 createdAt: new Date().toISOString(),
                 options: [
                     {
@@ -104,8 +103,6 @@ console.log("bootstrap - user param:", userParam);
             createdAt: new Date().toISOString(),
         };
     }
-
-
 
     function buildValidationRetryMessage(errorMessage, retryQuestion) {
         if (errorMessage && retryQuestion) {
@@ -381,7 +378,11 @@ console.log("bootstrap - user param:", userParam);
                 {#each messages as message (message.id)}
                     {#if message.role === "user"}
                         <div class="pb-12">
-                            <MessageUser {message} {formatTimestamp} />
+                            <MessageUser
+                                {message}
+                                {formatTimestamp}
+                                user={userParam}
+                            />
                         </div>
                     {:else if message.role === "assistant" && message.card?.type === "album"}
                         <MessageAlbumCard {message} />

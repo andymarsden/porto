@@ -1,5 +1,6 @@
 <script>
-	let { message, formatTimestamp } = $props();
+	let { message, formatTimestamp, user = "User" } = $props();
+
 </script>
 
 <article class="flex justify-end">
@@ -58,7 +59,7 @@
 				</span>
 			{/if}
 			<!-- <p class="text-muted-foreground text-[11px]">Andy • {formatTimestamp(message.createdAt)}  •  <a href="#"><u>edit</u></a></p> -->
-			<p class="text-muted-foreground text-[11px]">Andy • {formatTimestamp(message.createdAt)}</p>
+			<p class="text-muted-foreground text-[11px]">{user} • {formatTimestamp(message.createdAt)}</p>
 		</div>
 	</div>
 </article>

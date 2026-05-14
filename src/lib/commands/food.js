@@ -40,6 +40,7 @@ export const foodCommands = {
             message: "Food flow setup complete."
         }
     },
+    
     async politeResponse(payload) {
         let userAnswer = {};
         userAnswer.text = payload.answer?.toLowerCase() ?? "";
