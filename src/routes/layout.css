@@ -40,6 +40,9 @@
 	--sidebar-border: oklch(0.922 0 0);
 	--sidebar-ring: oklch(0.708 0 0);
 	--chart-blue: oklch(0.7 0.1 232);
+		--chart-green: oklch(63.376% 0.15594 151.928);
+			--chart-red: oklch(57.764% 0.22259 27.915);
+				--chart-yellow: oklch(94.342% 0.19919 105.972);
 }
 
 .dark {
@@ -75,6 +78,9 @@
 	--sidebar-border: oklch(1 0 0 / 10%);
 	--sidebar-ring: oklch(0.556 0 0);
 		--chart-blue: oklch(0.7 0.2442 343.06);
+				--chart-green: oklch(79.352% 0.26999 142.511);
+			--chart-red: oklch(62.946% 0.2508 28.582);
+				--chart-yellow: oklch(95.524% 0.16945 106.334);
 }
 
 @theme inline {

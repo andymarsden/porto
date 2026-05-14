@@ -73,7 +73,7 @@
                     {
                         id: "food",
                         label: "Data Summary",
-                        value: "food",
+                        value: "/chart",
                         button_type: "fancy",
                     },
                     {
