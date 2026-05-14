@@ -14,7 +14,6 @@ export const foodFlow = {
         {
             id:"reason_for_visit",
             question: "What brought you to the talking point today?",
-            command: "barnsley.search"
         },
         {
             id:"first_visit",

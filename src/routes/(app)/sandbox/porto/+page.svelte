@@ -67,7 +67,7 @@
             {
                 id: generateId(),
                 role: "assistant",
-                content: `Hi ${userParam || ""}!\n I'm Porto, your STAT assistant. How can I help you today? Ask me to do something, or I've given you some options to choose from!`,
+                content: `Hi ${userParam || ""}!\n I'm your QRIOS AI assistant. \nHow can I help you today? Ask me to do something, or I've given you some options to choose from!`,
                 createdAt: new Date().toISOString(),
                 options: [
                     {
