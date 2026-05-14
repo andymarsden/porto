@@ -47,12 +47,16 @@
     :global(:root) {
         --glass-bg: rgba(255, 255, 255, 0.7);
         --glass-hover: rgba(255, 255, 255, 0.9);
+		--glass-surface: #ffffff;
+		--glass-surface-hover: #f7f7fb;
         --glass-text: #111;
     }
 
     :global(.dark) {
         --glass-bg: rgba(255, 255, 255, 0.08);
         --glass-hover: rgba(255, 255, 255, 0.12);
+		--glass-surface: #13151b;
+		--glass-surface-hover: #1b1f29;
         --glass-text: white;
     }
 
@@ -61,11 +65,27 @@
         position: relative;
         padding-left: 0.625rem;
         padding-right: 0.625rem;
-        border: none;
+		border: 2px solid transparent;
         border-radius: 8px;
 
         color: var(--glass-text);
-        background: var(--glass-bg);
+		background:
+			linear-gradient(var(--glass-surface), var(--glass-surface)) padding-box,
+			linear-gradient(
+				122deg,
+				#ff00aa,
+				#ff5e5e,
+				#ffdd00,
+				#ff66cc,
+				#ffee55,
+				#ff00aa
+			) border-box;
+		background-size:
+			100% 100%,
+			400% 400%;
+		background-position:
+			0 0,
+			0% 50%;
 
         font-weight: 600;
         font-size: 14px;
@@ -74,6 +94,7 @@
         overflow: hidden;
 
         backdrop-filter: blur(14px);
+		animation: borderMove 16s ease-in-out infinite;
 
         transition:
             transform 0.2s ease,
@@ -82,65 +103,57 @@
 
     .glass-border-button:hover {
         /* transform: translateY(-1px); */
-        background: var(--glass-hover);
-    }
-
-    .glass-border-button::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        padding: 2px;
-        border-radius: inherit;
-
-        background: linear-gradient(
-            122deg,
-            #ff00aa,
-            #ff5e5e,
-            #ffdd00,
-            #ff66cc,
-            #ffee55,
-            #ff00aa
-        );
-
-        background-size: 400% 400%;
-        animation: borderMove 16s ease-in-out infinite;
-
-        mask:
-            linear-gradient(#000 0 0) content-box,
-            linear-gradient(#000 0 0);
-
-        mask-composite: exclude;
-
-        -webkit-mask:
-            linear-gradient(#000 0 0) content-box,
-            linear-gradient(#000 0 0);
-
-        -webkit-mask-composite: xor;
+		background:
+			linear-gradient(var(--glass-surface-hover), var(--glass-surface-hover)) padding-box,
+			linear-gradient(
+				122deg,
+				#ff00aa,
+				#ff5e5e,
+				#ffdd00,
+				#ff66cc,
+				#ffee55,
+				#ff00aa
+			) border-box;
+		background-size:
+			100% 100%,
+			400% 400%;
     }
 
     @keyframes borderMove {
         0% {
-            background-position: 0% 50%;
+			background-position:
+				0 0,
+				0% 50%;
         }
 
         20% {
-            background-position: 100% 20%;
+			background-position:
+				0 0,
+				100% 20%;
         }
 
         40% {
-            background-position: 80% 100%;
+			background-position:
+				0 0,
+				80% 100%;
         }
 
         60% {
-            background-position: 20% 80%;
+			background-position:
+				0 0,
+				20% 80%;
         }
 
         80% {
-            background-position: 120% 40%;
+			background-position:
+				0 0,
+				120% 40%;
         }
 
         100% {
-            background-position: 0% 50%;
+			background-position:
+				0 0,
+				0% 50%;
         }
     }
 	:global(.assistant-markdown h1),
