@@ -1,5 +1,6 @@
 import { commands } from "$lib/commands";
 import { startFlow } from "$lib/flows/engine.js";
+import { wait } from "$lib/utils";
 
 function createIntentResponse(text, activeFlow = null, card = null, options = null) {
     return { text, activeFlow, card, options };
@@ -156,7 +157,9 @@ const COMMANDS = [
     },
     {
         prefix: "chart",
+        
         handler: async () => {
+            await wait(2000); // Simulate loading time
             const chartCard = {
                 type: "chart",
                 labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
