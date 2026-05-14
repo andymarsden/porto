@@ -8,6 +8,53 @@ const flowRegistry = {
     "favorite-food": foodFlow
 };
 
+const BRACKETED_OPTION_PATTERN = /^\[([a-z0-9])\]\s*(.*)$/i;
+
+function normalizeForMatch(value) {
+    return String(value ?? "").trim().toLowerCase();
+}
+
+function parseBracketedOption(option) {
+    const match = String(option ?? "").trim().match(BRACKETED_OPTION_PATTERN);
+
+    if (!match) {
+        return null;
+    }
+
+    return {
+        label: normalizeForMatch(match[1]),
+        text: normalizeForMatch(match[2])
+    };
+}
+
+function resolveOptionAnswer(userInput, options = []) {
+    const normalizedInput = normalizeForMatch(userInput);
+
+    if (!normalizedInput || !Array.isArray(options) || options.length === 0) {
+        return null;
+    }
+
+    const exactOption = options.find((option) => normalizeForMatch(option) === normalizedInput);
+    if (exactOption) {
+        return exactOption;
+    }
+
+    const byLabel = options.find((option) => parseBracketedOption(option)?.label === normalizedInput);
+    if (byLabel) {
+        return byLabel;
+    }
+
+    const byText = options.find((option) => {
+        const parsed = parseBracketedOption(option);
+        if (!parsed) {
+            return false;
+        }
+        return parsed.text === normalizedInput;
+    });
+
+    return byText ?? null;
+}
+
 function getSetupCommand(step) {
     return step?.setupCommand ?? step?.setup_command ?? null;
 }
@@ -75,10 +122,28 @@ export async function saveFlowAnswer(activeFlow, answer) {
     }
 
     const normalizedAnswer = String(answer ?? "").trim();
+    let finalAnswer = normalizedAnswer;
+
+    if (currentStep.options?.length) {
+        const matchedOption = resolveOptionAnswer(normalizedAnswer, currentStep.options);
+
+        if (!matchedOption) {
+            return {
+                activeFlow,
+                nextStep: getCurrentFlowStep(activeFlow),
+                isComplete: false,
+                answers: activeFlow.answers,
+                errorMessage:
+                    "Please choose one of the listed options (you can type the letter or the full option text)."
+            };
+        }
+
+        finalAnswer = matchedOption;
+    }
 
     const candidateAnswers = {
         ...activeFlow.answers,
-        [currentStep.id]: normalizedAnswer
+        [currentStep.id]: finalAnswer
     };
 
     //VALIDATION PROCESS
@@ -87,7 +152,7 @@ export async function saveFlowAnswer(activeFlow, answer) {
     if (validateCommand) {
         try {
             const validationResult = await executeCommand(validateCommand, {
-                answer: normalizedAnswer,
+                answer: finalAnswer,
                 stepId: currentStep.id,
                 answers: candidateAnswers
             });
@@ -130,7 +195,7 @@ export async function saveFlowAnswer(activeFlow, answer) {
     if (currentStep?.command) {
         try {
             const result = await executeCommand(currentStep.command, {
-                answer: normalizedAnswer,
+                answer: finalAnswer,
                 stepId: currentStep.id,
                 answers
             });

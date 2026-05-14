@@ -150,6 +150,17 @@ On validation failure:
 - the answer is not saved to flow state
 - the user sees either `message`, `error`, or fallback text: "Invalid answer, please try again."
 
+### Option Input Matching
+
+When a step includes an `options` array, the flow engine accepts multiple input styles:
+
+- case-insensitive exact option text (`yes` matches `Yes`)
+- bracketed option labels (`A` or `a` matches `[A] Yes`)
+- case-insensitive option text for bracketed options (`porto hub` matches `[A] Porto Hub`)
+
+If no option matches, the step does not advance and the same question is repeated with guidance.
+Matched values are stored as the canonical option string from the `options` array.
+
 ### 4. Register Commands
 
 Update `src/lib/commands/index.js`:
