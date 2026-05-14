@@ -11,12 +11,11 @@
     CategoryScale,
   } from "chart.js";
   import { THEME_EVENT } from "$lib/services/theme.js";
+  import { renderAssistantMarkdown } from "$lib/utils/markdown.js";
 
   ChartJS.register(Tooltip, Legend, LineElement, PointElement, LinearScale, CategoryScale);
 
   let { message } = $props();
-
-  message = "Client trend data for the last 6 weeks"; // Placeholder until we have real API data
   const labels = ["02/04", "09/04", "16/04", "23/04", "30/04", "07/05"];
 
   const clientData = {
@@ -29,6 +28,7 @@
   let data = $state({ labels, datasets: [] });
   let options = $state({});
   const commentary = $derived(String(message?.card?.commentary ?? message?.content ?? "").trim());
+  const renderedCommentary = $derived(renderAssistantMarkdown("**CWAC** showed the strongest overall growth during the reporting period, rising steadily from 55 to 159 and remaining the highest-volume client throughout most weeks.\n\n**SLAN** also demonstrated consistent upward performance, increasing from 42 to a peak of 115 before dipping slightly to 109 in the final week, suggesting growth may be beginning to stabilise.\n\n**SBOR** experienced the fastest relative growth, climbing rapidly from 1 to 91, particularly after mid-April, indicating a significant recent increase in activity.\n\n**GATE** remained comparatively low-volume but still showed gradual progression, increasing from 0 to 12 over the six-week period."));
 
   function getTokenValue(name, fallback) {
     if (typeof window === "undefined") return fallback;
@@ -135,9 +135,9 @@ const colors = [
   });
 </script>
 
-<article class="text-foreground text-[15px] leading-7">
+<!-- <article class="text-foreground text-[15px] leading-7"> -->
   <p class="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wide">
-    Client Trend
+    QRIOS Client Trends (Mar - Apr 2026)
   </p>
 
   <div class="border-border bg-muted/40 rounded-xl border p-4">
@@ -146,23 +146,108 @@ const colors = [
     </div>
   </div>
 
-  <div class="border-border/70 mt-3 rounded-xl border border-dashed p-4" aria-label="Chart commentary">
+  <!-- <div class="border-border/70 mt-3 rounded-xl border border-dashed p-4" aria-label="Chart commentary"> -->
     <p class="text-muted-foreground mb-2 text-[11px] font-medium uppercase tracking-wide">Commentary</p>
-    <p id="chart-commentary" class="text-foreground text-sm leading-6">
-
-CWAC showed the strongest overall growth during the reporting period, rising steadily from 55 to 159 and remaining the highest-volume client throughout most weeks.
-
-SLAN also demonstrated consistent upward performance, increasing from 42 to a peak of 115 before dipping slightly to 109 in the final week, suggesting growth may be beginning to stabilise.
-
-SBOR experienced the fastest relative growth, climbing rapidly from 1 to 91, particularly after mid-April, indicating a significant recent increase in activity.
-
-GATE remained comparatively low-volume but still showed gradual progression, increasing from 0 to 12 over the six-week period.
-
-    </p>
-    <!-- {#if commentary}
-      <p class="text-foreground text-sm leading-6">{commentary}</p>
-    {:else}
-      <p class="text-muted-foreground text-sm leading-6">No commentary yet.</p>
+    <!-- {#if commentary} -->
+      <div id="chart-commentary" class="assistant-markdown wrap-break-word text-foreground text-sm leading-6">
+        {@html renderedCommentary}
+      </div>
+    <!-- {:else}
+      <p id="chart-commentary" class="text-muted-foreground text-sm leading-6">No commentary yet.</p>
     {/if} -->
-  </div>
-</article>
+  <!-- </div> -->
+<!-- </article> -->
+
+<style>
+  :global(.assistant-markdown h1),
+  :global(.assistant-markdown h2),
+  :global(.assistant-markdown h3),
+  :global(.assistant-markdown h4),
+  :global(.assistant-markdown h5),
+  :global(.assistant-markdown h6) {
+    margin: 0.75rem 0 0.5rem;
+    font-weight: 650;
+    line-height: 1.25;
+  }
+
+  :global(.assistant-markdown h1) {
+    font-size: 1.5rem;
+  }
+
+  :global(.assistant-markdown h2) {
+    font-size: 1.3rem;
+  }
+
+  :global(.assistant-markdown h3) {
+    font-size: 1.15rem;
+  }
+
+  :global(.assistant-markdown p) {
+    margin: 0.5rem 0;
+  }
+
+  :global(.assistant-markdown ul),
+  :global(.assistant-markdown ol) {
+    margin: 0.5rem 0;
+    padding-left: 1.25rem;
+  }
+
+  :global(.assistant-markdown ul) {
+    list-style: disc;
+  }
+
+  :global(.assistant-markdown ol) {
+    list-style: decimal;
+  }
+
+  :global(.assistant-markdown code) {
+    background: color-mix(in oklab, currentColor 10%, transparent);
+    border-radius: 0.25rem;
+    padding: 0.1rem 0.3rem;
+  }
+
+  :global(.assistant-markdown pre) {
+    overflow-x: auto;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background: color-mix(in oklab, currentColor 8%, transparent);
+  }
+
+  :global(.assistant-markdown a) {
+    text-decoration: underline;
+  }
+
+  :global(.assistant-markdown table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.75rem 0;
+    font-size: 0.875rem;
+  }
+
+  :global(.assistant-markdown th),
+  :global(.assistant-markdown td) {
+    padding: 0.45rem 0.75rem;
+    border: 1px solid color-mix(in oklab, currentColor 18%, transparent);
+    text-align: left;
+  }
+
+  :global(.assistant-markdown th) {
+    font-weight: 600;
+    background: color-mix(in oklab, currentColor 6%, transparent);
+  }
+
+  :global(.assistant-markdown tbody tr:nth-child(even)) {
+    background: color-mix(in oklab, currentColor 3%, transparent);
+  }
+
+  :global(.assistant-markdown hr) {
+    margin: 0.9rem 0;
+    border: 0;
+    border-top: 1px solid color-mix(in oklab, currentColor 28%, transparent);
+  }
+
+  :global(.assistant-markdown em),
+  :global(.assistant-markdown i) {
+    font-style: italic;
+  }
+</style>
