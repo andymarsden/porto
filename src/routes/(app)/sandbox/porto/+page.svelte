@@ -1,6 +1,7 @@
 <script>
     // Svelte
     import { onMount, tick } from "svelte";
+    import { page } from "$app/stores";
 
     // External UI assets
     import ChevronsUpDownIcon from "@lucide/svelte/icons/chevrons-up-down";
@@ -43,6 +44,8 @@
     let draft = $state("");
     let isThinking = $state(false);
     let activeFlow = $state(null);
+    //DEMO ONLY
+    let userParam = $state(null);
     //#endregion
 
     //#region DOM refs
@@ -51,14 +54,10 @@
     let textareaRef = $state(null);
     //#endregion
 
-    //#region Chat specific
-    function createMessage(role, content) {
-        return {
-            id: generateId(),
-            role,
-            content,
-            createdAt: new Date().toISOString(),
-        };
+    //#region Setup
+
+    function bootstrap(){
+console.log("bootstrap - user param:", userParam);
     }
 
     function setUpMessage() {
@@ -74,7 +73,7 @@
                 options: [
                     {
                         id: "food",
-                        label: "Check data",
+                        label: "Data Summary",
                         value: "food",
                         button_type: "fancy",
                     },
@@ -94,6 +93,19 @@
             },
         ];
     }
+    //#endregion
+
+    //#region Chat specific
+    function createMessage(role, content) {
+        return {
+            id: generateId(),
+            role,
+            content,
+            createdAt: new Date().toISOString(),
+        };
+    }
+
+
 
     function buildValidationRetryMessage(errorMessage, retryQuestion) {
         if (errorMessage && retryQuestion) {
@@ -163,14 +175,6 @@
             options: normalizedIntentResponse.options,
         };
     }
-
-    // async function handleUserMessage(content) {
-    //     if (activeFlow) {
-    //         return handleFlowAnswer(content);
-    //     }
-
-    //     return resolveIntent(content);
-    // }
 
     //#endregion
 
@@ -332,6 +336,8 @@
 
     //#region Initial setup
     onMount(async () => {
+        userParam = $page.url.searchParams.get("user");
+        bootstrap();
         setUpMessage();
         autoResizeTextarea();
         await scrollToBottom();
