@@ -68,7 +68,7 @@ console.log("bootstrap - user param:", userParam);
                 id: generateId(),
                 role: "assistant",
                 content:
-                    "Hello! I'm Porto, your assistant for testing flows and intents. How can I help you today?",
+                    `Hi ${userParam || ""}! I'm Porto, your assistant for testing flows and intents. How can I help you today?`,
                 createdAt: new Date().toISOString(),
                 options: [
                     {
@@ -79,7 +79,7 @@ console.log("bootstrap - user param:", userParam);
                     },
                     {
                         id: "onboard",
-                        label: "Start onboarding",
+                        label: "Start QRIOS",
                         value: "onboard",
                         button_type: "secondary",
                     },
@@ -375,6 +375,9 @@ console.log("bootstrap - user param:", userParam);
             <div
                 class="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 py-8 pb-28 md:px-6 md:pb-36"
             >
+                {#if messages.length === 0}
+                    <p class="text-muted-foreground text-sm">Loading...</p>
+                {/if}
                 {#each messages as message (message.id)}
                     {#if message.role === "user"}
                         <div class="pb-12">
