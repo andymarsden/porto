@@ -1,11 +1,12 @@
-
+import { qriosFormFlow } from "./qriosForm";
 import { basicDetailsFlow } from "./basicDetails";
 import { foodFlow } from "./food";
 import { executeCommand } from "$lib/commands/execute";
 
 const flowRegistry = {
     "basic-details": basicDetailsFlow,
-    "favorite-food": foodFlow
+    "favorite-food": foodFlow,
+    "qrios-form": qriosFormFlow
 };
 
 function getSetupCommand(step) {

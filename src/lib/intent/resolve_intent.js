@@ -110,6 +110,17 @@ export async function resolveIntent(input) {
 
         return createIntentResponse(`Latest flow payload:\n${JSON.stringify(latestFlow, null, 2)}`);
     }
+    if (text === "/qrios") {
+        const activeFlow = await startFlow("qrios-form");
+
+       if (!activeFlow) {
+           return createIntentResponse("That flow is unavailable right now.");
+       }
+
+        const firstStep = activeFlow.flow.steps[0];
+        return createIntentResponse(firstStep.question, activeFlow, null, firstStep.options);
+        //return activeFlow.flow.steps[0].question;
+    }
 
     return createIntentResponse("Unknown command. Try /echo <message> or /flow-list (from intent).");
 }
