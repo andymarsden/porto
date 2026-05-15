@@ -1,4 +1,7 @@
 <script>
+
+import { executeCommand } from "$lib/commands/execute";
+
     // Svelte
     import { onMount, tick } from "svelte";
     import { page } from "$app/stores";
@@ -218,21 +221,49 @@
         // form?.dispatchEvent(new Event('submit', { bubbles: true }));
     }
 
+//TODO This should come from engine I think
+async function transformUserAnswer()
+{
+    console.log("!!!!!!!!!Transforming user answer for flow submission...");
+}
+
     async function handleSubmit(event) {
         event.preventDefault();
 
         if (isThinking) return;
 
-        const content = draft.trim();
+        let content = draft.trim();
         if (!content) return;
 
         isThinking = true;
 
         let thinkingMessage = createMessage("thinking", "thinking...");
         const isFlowSubmission = Boolean(activeFlow);
-        const userMessage = {
-            ...createMessage("user", content),
-            isValidated: isFlowSubmission ? null : undefined,
+
+        // is it in a current flow and do we need to transform it?
+        if(isFlowSubmission) {
+            //is there a transform function defined for this flow step?
+            const currentStep = getCurrentFlowStep(activeFlow);
+            if(currentStep?.transform) {
+
+
+                 const transformedAnswer = await executeCommand(currentStep?.transform, {
+                answer: content,
+                stepId: currentStep.id
+            });
+
+             if(transformedAnswer !== undefined && transformedAnswer !== null && !transformedAnswer.error) {
+                content = transformedAnswer;
+             }
+             else {
+                console.warn("Transform function did not return a value, using original answer");
+             }
+            }
+            thinkingMessage.content = "Let me check that for you...";
+        }
+
+
+        const userMessage = {...createMessage("user", content ),isValidated: isFlowSubmission ? null : undefined,
         };
 
         draft = "";

@@ -13,6 +13,8 @@ export const basicDetailsFlow = {
         {
             id: "when-attended",
             question: "When did you attend?",
+            transform:"food.normalizeDate",
+            validate: "food.validateDate"
         },
         {
             id: "postcode",

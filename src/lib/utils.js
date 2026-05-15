@@ -1,8 +1,19 @@
 import { clsx, } from "clsx";
 import { twMerge } from "tailwind-merge";
+import * as chrono from "chrono-node";
+
 
 export function cn(...inputs) {
 	return twMerge(clsx(inputs));
+}
+
+
+
+export function parseDate(value) {
+    if (typeof value !== "string" || !value.trim()) return null;
+
+    const parsed = chrono.parseDate(value);
+    return parsed ?? null;
 }
 
 export function formatTimestamp(value) {

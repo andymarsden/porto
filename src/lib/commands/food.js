@@ -1,9 +1,39 @@
 import { generateId } from "$lib/utils.js";
 import { checkFoodAnswer } from "$lib/actions/food";
+import { parseDate } from "$lib/utils.js";
+
 
 const FLOW_SUBMISSIONS = [];
 
 export const foodCommands = {
+    async capitalize(text) {
+        return String(text.answer ?? "").toUpperCase();
+    },
+
+//function to check for valid date
+    async validateDate(text) {
+        console.log("[food.validateDate] Validating date answer:", text.answer);
+        const parsedDate = parseDate(String(text.answer ?? ""));
+        const isValid = !!parsedDate;
+
+        return {
+            valid: isValid,
+            message: isValid
+                ? undefined
+                : "Sorry, I couldn't understand that date. Please try again with a different format."
+        };
+    },
+
+    async normalizeDate(text) {
+        const parsedDate = parseDate(String(text.answer ?? ""));
+        if (!parsedDate) {
+            return {
+                error: "Sorry, I couldn't understand that date. Please try again with a different format."
+            };
+        }
+        return parsedDate.toISOString().split("T")[0]; // Return date in YYYY-MM-DD format
+    },
+
     async saveFlow({ answers }) {
         const submission = {
             id: generateId(),
@@ -40,7 +70,7 @@ export const foodCommands = {
             message: "Food flow setup complete."
         }
     },
-    
+
     async politeResponse(payload) {
         let userAnswer = {};
         userAnswer.text = payload.answer?.toLowerCase() ?? "";
@@ -49,18 +79,18 @@ export const foodCommands = {
         userAnswer.post_text = "";
         return userAnswer;
     },
-    async japaneseFoodCheck(payload) {  
+    async japaneseFoodCheck(payload) {
 
-    const bannedFoods = ["beef"];
-    const normalizedAnswer = String(payload.answer ?? "").trim().toLowerCase();
-    const isValid = !bannedFoods.includes(normalizedAnswer);
+        const bannedFoods = ["beef"];
+        const normalizedAnswer = String(payload.answer ?? "").trim().toLowerCase();
+        const isValid = !bannedFoods.includes(normalizedAnswer);
 
-    return {
-        valid: isValid,
-        message: isValid
-            ? undefined
-            : "beef is not allowed here. Please choose another Japanese food."
-    };
+        return {
+            valid: isValid,
+            message: isValid
+                ? undefined
+                : "beef is not allowed here. Please choose another Japanese food."
+        };
 
     }
 
