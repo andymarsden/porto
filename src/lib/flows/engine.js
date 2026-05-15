@@ -2,11 +2,13 @@
 import { basicDetailsFlow } from "./basicDetails";
 import { foodFlow } from "./food";
 import { executeCommand } from "$lib/commands/execute";
+import { qriosDemoFlow } from "./qrios";
 
 const flowRegistry = {
     "basic-details": basicDetailsFlow,
     "favorite-food": foodFlow,
-    "qrios": foodFlow
+    "qrios": foodFlow,
+    "qrios-demo": qriosDemoFlow
 };
 
 const BRACKETED_OPTION_PATTERN = /^\[([a-z0-9])\]\s*(.*)$/i;
