@@ -1,7 +1,6 @@
 <script>
 
-import { executeCommand } from "$lib/commands/execute";
-
+    //#region Imports
     // Svelte
     import { onMount, tick } from "svelte";
     import { page } from "$app/stores";
@@ -25,16 +24,14 @@ import { executeCommand } from "$lib/commands/execute";
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
     import { Textarea } from "$lib/components/ui/textarea/index.js";
 
-    // Utils
-    import {
-        getCurrentFlowStep,
-        saveFlowAnswer,
-        startFlow,
-    } from "$lib/flows/engine.js";
+    // App logic and utilities
+    import { executeCommand } from "$lib/commands/execute";
+    import { getCurrentFlowStep, saveFlowAnswer, startFlow } from "$lib/flows/engine.js";
     import { persistCompletedFlow } from "$lib/flows/persistence.js";
     import { resolveIntent } from "$lib/intent/resolve_intent.js";
     import { streamTextByWords } from "$lib/utils/streaming.js";
     import { formatTimestamp, wait, generateId } from "$lib/utils.js";
+    //#endregion
 
     //#region Layout limits
     const MAX_TEXTAREA_HEIGHT = 224;
@@ -47,7 +44,7 @@ import { executeCommand } from "$lib/commands/execute";
     let draft = $state("");
     let isThinking = $state(false);
     let activeFlow = $state(null);
-    //DEMO ONLY
+    // DEMO ONLY
     let userParam = $state(null);
     //#endregion
 
@@ -57,14 +54,13 @@ import { executeCommand } from "$lib/commands/execute";
     let textareaRef = $state(null);
     //#endregion
 
-    //#region Setup
-
+    //#region Initial setup helpers
     function bootstrap() {
         console.log("bootstrap - user param:", userParam);
     }
 
     function setUpMessage() {
-        //post example message as assistant
+        // Post example message as assistant.
         messages = [
             ...messages,
             {
@@ -97,7 +93,7 @@ import { executeCommand } from "$lib/commands/execute";
     }
     //#endregion
 
-    //#region Chat specific
+    //#region Message utilities
     function createMessage(role, content) {
         return {
             id: generateId(),
@@ -108,18 +104,22 @@ import { executeCommand } from "$lib/commands/execute";
     }
 
     function buildValidationRetryMessage(errorMessage, retryQuestion) {
+        // Keep both error and retry prompt together when both are available.
         if (errorMessage && retryQuestion) {
             return `${errorMessage}\n\n${retryQuestion}`;
         }
 
         return errorMessage ?? retryQuestion ?? "Flow step is missing.";
     }
+    //#endregion
 
+    //#region Core message orchestration
     async function processMessage(content) {
         const text = String(content ?? "").trim();
 
         await wait(700);
 
+        // If a flow is active, continue that flow; otherwise resolve a new intent.
         if (activeFlow) {
             const result = await saveFlowAnswer(activeFlow, text);
             activeFlow = result.activeFlow;
@@ -175,7 +175,6 @@ import { executeCommand } from "$lib/commands/execute";
             options: normalizedIntentResponse.options,
         };
     }
-
     //#endregion
 
     //#region UI helpers
@@ -195,15 +194,8 @@ import { executeCommand } from "$lib/commands/execute";
     async function scrollToBottom() {
         await tick();
 
-        // if (messageListRef) {
-        //     messageListRef.scrollTop = messageListRef.scrollHeight;
-        // }
-
-        // if (messageEndRef) {
-        //     messageEndRef.scrollIntoView({ block: "end" });
-        // }
-
-        //No need to overcomplicate this, just scroll to the bottom of the page everytime messages update. This way we don't have to worry about which element is the scroll container, and it works even if the structure of the page changes.
+        // No need to overcomplicate this: scroll to the bottom of the page
+        // when messages update so this still works if layout containers change.
         window.scrollTo({
             top: document.body.scrollHeight,
             behavior: "smooth",
@@ -214,18 +206,16 @@ import { executeCommand } from "$lib/commands/execute";
     //#region Composer handlers
     async function handleOptionSelect(value) {
         draft = value;
-        // Auto-submit the option as the user's response
+
+        // Auto-submit the selected option as the user's response.
         await tick();
         await handleSubmit(new Event("submit", { bubbles: true }));
-        // const form = document.querySelector('form');
-        // form?.dispatchEvent(new Event('submit', { bubbles: true }));
     }
 
-//TODO This should come from engine I think
-async function transformUserAnswer()
-{
-    console.log("!!!!!!!!!Transforming user answer for flow submission...");
-}
+    // TODO: This should come from engine I think
+    async function transformUserAnswer() {
+        console.log("!!!!!!!!!Transforming user answer for flow submission...");
+    }
 
     async function handleSubmit(event) {
         event.preventDefault();
@@ -240,42 +230,45 @@ async function transformUserAnswer()
         let thinkingMessage = createMessage("thinking", "thinking...");
         const isFlowSubmission = Boolean(activeFlow);
 
-        // is it in a current flow and do we need to transform it?
-        if(isFlowSubmission) {
-            //is there a transform function defined for this flow step?
+        // Flow answers can run through an optional step-level transform command.
+        if (isFlowSubmission) {
             const currentStep = getCurrentFlowStep(activeFlow);
-            if(currentStep?.transform) {
 
+            if (currentStep?.transform) {
+                const transformedAnswer = await executeCommand(currentStep?.transform, {
+                    answer: content,
+                    stepId: currentStep.id,
+                });
 
-                 const transformedAnswer = await executeCommand(currentStep?.transform, {
-                answer: content,
-                stepId: currentStep.id
-            });
-
-             if(transformedAnswer !== undefined && transformedAnswer !== null && !transformedAnswer.error) {
-                content = transformedAnswer;
-             }
-             else {
-                console.warn("Transform function did not return a value, using original answer");
-             }
+                if (
+                    transformedAnswer !== undefined
+                    && transformedAnswer !== null
+                    && !transformedAnswer.error
+                ) {
+                    content = transformedAnswer;
+                } else {
+                    console.warn("Transform function did not return a value, using original answer");
+                }
             }
+
             thinkingMessage.content = "Let me check that for you...";
         }
 
-
-        const userMessage = {...createMessage("user", content ),isValidated: isFlowSubmission ? null : undefined,
+        const userMessage = {
+            ...createMessage("user", content),
+            isValidated: isFlowSubmission ? null : undefined,
         };
 
         draft = "";
 
-        //Add messaged back to messages, with a user message and a "thinking..." message that we can replace later with the actual response
+        // Add user message and a temporary thinking message to replace later.
         messages = [...messages, userMessage, thinkingMessage];
 
-        // Scroll down immediately after showing the submission
+        // Scroll down immediately after showing the submission.
         await scrollToBottom();
 
-        //#region get response and update messages
-        //This entire bit will need re thinking once we have actual streaming responses, but for now this is fine as there is a new ID generated for each message, so we can easily find and replace the "thinking..." message with the actual response once it's ready
+        //#region Get response and update messages
+        // Keep temporary-message replacement centralized until full streaming API is wired in.
         try {
             const assistantResponse = await processMessage(content);
 
@@ -290,14 +283,16 @@ async function transformUserAnswer()
                 );
             }
 
-            //remove the "thinking..." message
+            // Remove the "thinking..." message.
             messages = messages.filter((msg) => msg.id !== thinkingMessage.id);
 
-            //add the assistant message shell, then stream text into it
+            // Add the assistant message shell, then stream text into it.
             const assistantMessage = createMessage("assistant", "");
+
             if (assistantResponse.card) {
                 assistantMessage.card = assistantResponse.card;
             }
+
             messages = [...messages, assistantMessage];
 
             await streamTextByWords(assistantResponse.text, {
@@ -309,25 +304,23 @@ async function transformUserAnswer()
                             ? { ...msg, content: nextContent }
                             : msg,
                     );
-                    // Scroll to keep the streaming response visible
+
+                    // Scroll to keep the streaming response visible.
                     void scrollToBottom();
                 },
             });
 
-            // add options only after streaming completes so they don't appear prematurely
-            //OPTIONS ARE SHOWN HERE!!!!
+            // Add options after streaming completes so they do not appear prematurely.
             if (assistantResponse.options) {
                 messages = messages.map((msg) =>
                     msg.id === assistantMessage.id
                         ? {
                               ...msg,
-                              options: assistantResponse.options.map(
-                                  (opt, i) => ({
-                                      id: `opt-${i}`,
-                                      label: opt,
-                                      value: opt,
-                                  }),
-                              ),
+                              options: assistantResponse.options.map((opt, i) => ({
+                                  id: `opt-${i}`,
+                                  label: opt,
+                                  value: opt,
+                              })),
                           }
                         : msg,
                 );
@@ -361,18 +354,19 @@ async function transformUserAnswer()
         void scrollToBottom();
     });
 
-    // Find the index of the last assistant message with options
+    // Track the latest assistant message with options so only it gets option emphasis in the UI.
     const lastAssistantMessageWithOptionsIndex = $derived.by(() => {
         for (let i = messages.length - 1; i >= 0; i--) {
             if (messages[i].role === "assistant" && messages[i].options?.length > 0) {
                 return i;
             }
         }
-        return -1; // No message with options found
+
+        return -1;
     });
     //#endregion
 
-    //#region Initial setup
+    //#region Lifecycle
     onMount(async () => {
         userParam = $page.url.searchParams.get("user");
         bootstrap();
