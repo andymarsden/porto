@@ -190,7 +190,7 @@ const COMMANDS = [
         }
     },
     {
-        prefix: "qrios demo",
+        prefix: "qdemo",
         handler: flowCommand("qrios-demo")
     },
 ];
