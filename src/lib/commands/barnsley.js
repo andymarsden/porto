@@ -32,7 +32,7 @@ const messageContent = result[0]?.choices[0]?.message?.content;
         let userAnswer = {};
         userAnswer.text = payload.answer?.toLowerCase() ?? "";
         //add a line break in the string below
-        userAnswer.pre_text = "Thanks for your answer, ive found some information that maybe abe to help ---\n\n" + (messageContent ? messageContent + "\n\n ---\n\n **Next question:** \n\n" : "");
+        userAnswer.pre_text = "Thanks for your answer, ive found some information that maybe abe to help\n\n ---\n\n " + (messageContent ? messageContent + "\n\n ---\n\n **Next question:** \n\n" : "");
         userAnswer.post_text = "";
         return userAnswer;
     }

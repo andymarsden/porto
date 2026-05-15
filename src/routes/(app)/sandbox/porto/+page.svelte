@@ -67,7 +67,7 @@
             {
                 id: generateId(),
                 role: "assistant",
-                content: `Hi ${userParam || ""}!\n I'm your QRIOS AI assistant. \nHow can I help you today? Ask me to do something, or I've given you some options to choose from!`,
+                content: `Hi ${userParam || ""}!\n I'm your QRIOS AI assistant. \nHow can I help you today? Ask me to do something, or here are some options to choose from:`,
                 createdAt: new Date().toISOString(),
                 options: [
                     {
@@ -329,6 +329,16 @@
         messages;
         void scrollToBottom();
     });
+
+    // Find the index of the last assistant message with options
+    const lastAssistantMessageWithOptionsIndex = $derived.by(() => {
+        for (let i = messages.length - 1; i >= 0; i--) {
+            if (messages[i].role === "assistant" && messages[i].options?.length > 0) {
+                return i;
+            }
+        }
+        return -1; // No message with options found
+    });
     //#endregion
 
     //#region Initial setup
@@ -375,7 +385,7 @@
                 {#if messages.length === 0}
                     <p class="text-muted-foreground text-sm">Loading...</p>
                 {/if}
-                {#each messages as message (message.id)}
+                {#each messages as message, index (message.id)}
                     {#if message.role === "user"}
                         <div class="pb-12">
                             <MessageUser
@@ -392,6 +402,7 @@
                         <MessageAssistant
                             {message}
                             onOptionSelect={handleOptionSelect}
+                            isLastMessageWithOptions={index === lastAssistantMessageWithOptionsIndex}
                         />
                     {:else if message.role === "thinking"}
                         <MessageThinking {message} />

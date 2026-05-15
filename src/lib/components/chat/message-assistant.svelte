@@ -3,7 +3,7 @@
 	import { renderAssistantMarkdown } from "$lib/utils/markdown.js";
 
 	// onOptionSelect is called with option.value when a choice button is clicked.
-	let { message, onOptionSelect } = $props();
+	let { message, onOptionSelect, isLastMessageWithOptions = true } = $props();
 	const renderedContent = $derived(renderAssistantMarkdown(message.content));
 </script>
 
@@ -25,7 +25,14 @@
 		<div class="mt-3 flex flex-wrap gap-2">
 			{#each message.options as option (option.id)}
 				{#if option.button_type === "fancy"}
-					<button class="glass-border-button" onclick={() => onOptionSelect?.(option.value)}> {option.label} </button>
+					<button 
+						class="glass-border-button" 
+						onclick={() => onOptionSelect?.(option.value)}
+						disabled={!isLastMessageWithOptions}
+						style={!isLastMessageWithOptions ? 'opacity: 0.5; cursor: not-allowed;' : ''}
+					> 
+						{option.label} 
+					</button>
 					
 				{:else}
 					<Button
@@ -33,6 +40,7 @@
 						size="sm"
 						class="rounded-md cursor-pointer"
 						onclick={() => onOptionSelect?.(option.value)}
+						disabled={!isLastMessageWithOptions}
 					>
 						{option.label}
 					</Button>
