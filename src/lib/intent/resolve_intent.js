@@ -188,7 +188,11 @@ const COMMANDS = [
             if (!latestFlow) return createIntentResponse("No saved flow payloads yet. Run /onboard and complete the flow first.");
             return createIntentResponse(`Latest flow payload:\n${JSON.stringify(latestFlow, null, 2)}`);
         }
-    }
+    },
+    {
+        prefix: "qrios demo",
+        handler: flowCommand("qrios-demo")
+    },
 ];
 
 export async function resolveIntent(input) {

@@ -1,5 +1,5 @@
-export const foodFlow = {
-    id: "favorite-food",
+export const qriosDemoFlow = {
+    id: "qrios-demo",
 
    steps: [
         {
@@ -14,7 +14,6 @@ export const foodFlow = {
         {
             id:"reason_for_visit",
             question: "What brought you to the talking point today?",
-            command: "barnsley.search"
         },
         {
             id:"first_visit",
@@ -29,7 +28,6 @@ export const foodFlow = {
         {
             id:"demographics_postcode",
             question: "What is your postcode?",
-             command: "basicDetails.getPostcodeInfo"
         },
         {
             id:"demographics_gender",
@@ -45,7 +43,7 @@ export const foodFlow = {
           //add new options
             id:"demographics_care_for_children",
             question: "Do you care for children?",
-                        options: ["[a] No", "[b] Yes - Pre-school age", "[c] Yes - Primary School age", "[d] Yes - Secondary School age"]
+            options: ["[a] No", "[b] Yes - Pre-school age", "[c] Yes - Primary School age", "[d] Yes - Secondary School age"]
         },
         {
             id:"demographics_ethnicity",
@@ -93,12 +91,12 @@ export const foodFlow = {
         {
           id:"next_steps",
           question: "### Next Steps\n\n\n---\n\n\nThis area is for recording and recording any actions agreed during the conversation. It’s an opportunity to reflect on the wellbeing responses and decide—together—what might help improve the person’s situation or resolve the situation.\n\n\nNext steps might include connecting with local support, accessing information or services or an introduction to other services or partners. They should be clear, achievable, and shaped jointly with the person wherever possible.\n\n\n---\n\n\n **Questions** \n\n\n Please record agreed actions or general notes only—no personal or identifying details should be recorded.",
-                    options: ["[a] information, advice and guidance offered", "[b] introduced to community activity", "[c] introduction to health colleagues", "[d] onward to adult social care", "[e] connection to housing", "[f] connection to other council service", "[g] invited to return", "[h] no further action - closed", "[i] other"]
+            options: ["[a] information, advice and guidance offered", "[b] introduced to community activity", "[c] introduction to health colleagues", "[d] onward to adult social care", "[e] connection to housing", "[f] connection to other council service", "[g] invited to return", "[h] no further action - closed", "[i] other"]
         },
         {
           id:"experience_venue",
           question: "### Experience\n\n\n---\n\n\nThese questions help us understand how the visit felt for the person attending—what worked well, and what could be improved.\n\n\nThis feedback is important. It helps us make sure hubs are welcoming, accessible, and useful, and that everyone is the service and support they expect and need in a way that feels right.\n\n\n---\n\n\n **Questions** \n\n\n How suitable did you find the venue?",
-                    options: ["[a] Not at all", "[b] Slightly", "[c] Somewhat", "[d] Fairly", "[e] Mostly", "[f] Completely"]
+            options: ["[a] Not at all", "[b] Slightly", "[c] Somewhat", "[d] Fairly", "[e] Mostly", "[f] Completely"]
         },
         {
           id:"experience_welcome",
