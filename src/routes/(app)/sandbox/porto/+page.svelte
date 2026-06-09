@@ -20,6 +20,7 @@
     import { Badge } from "$lib/components/ui/badge/index.js";
     import { Button } from "$lib/components/ui/button/index.js";
     import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
+    import { Input } from "$lib/components/ui/input/index.js";
     import { Textarea } from "$lib/components/ui/textarea/index.js";
 
     // Utils
@@ -44,6 +45,14 @@
     let draft = $state("");
     let isThinking = $state(false);
     let activeFlow = $state(null);
+    let currentUserLevel = $state(null);
+    let isQuestionComposerOpen = $state(false);
+    let questionComposerIndex = $state(null);
+    let questionDraft = $state({
+        name: "",
+        type: "text",
+        options: "",
+    });
     //DEMO ONLY
     let userParam = $state(null);
     //#endregion
@@ -61,6 +70,36 @@
     }
 
     function setUpMessage() {
+        const initialOptions = [
+            {
+                id: "food",
+                label: "Data Summary",
+                value: "/chart",
+                button_type: "fancy",
+            },
+            {
+                id: "onboard",
+                label: "Start QRIOS",
+                value: "qrios",
+                button_type: "secondary",
+            },
+            {
+                id: "music",
+                label: "Play some music",
+                value: "music",
+                button_type: "primary",
+            },
+        ];
+
+        if (isAdminUser(currentUserLevel)) {
+            initialOptions.push({
+                id: "add-question",
+                label: "Add question",
+                value: "add-question",
+                button_type: "secondary",
+            });
+        }
+
         //post example message as assistant
         messages = [
             ...messages,
@@ -69,26 +108,7 @@
                 role: "assistant",
                 content: `Hi ${userParam || ""}!\n I'm your QRIOS AI assistant. \nHow can I help you today? Ask me to do something, or here are some options to choose from:`,
                 createdAt: new Date().toISOString(),
-                options: [
-                    {
-                        id: "food",
-                        label: "Data Summary",
-                        value: "/chart",
-                        button_type: "fancy",
-                    },
-                    {
-                        id: "onboard",
-                        label: "Start QRIOS",
-                        value: "qrios",
-                        button_type: "secondary",
-                    },
-                    {
-                        id: "music",
-                        label: "Play some music",
-                        value: "music",
-                        button_type: "primary",
-                    },
-                ],
+                options: initialOptions,
             },
         ];
     }
@@ -209,7 +229,61 @@
     //#endregion
 
     //#region Composer handlers
+    function isAdminUser(level) {
+        return level === 0 || level === 7;
+    }
+
+    function openQuestionComposer(index) {
+        questionComposerIndex = index;
+        isQuestionComposerOpen = true;
+        questionDraft = { name: "", type: "text", options: "" };
+    }
+
+    function cancelQuestionComposer() {
+        isQuestionComposerOpen = false;
+        questionComposerIndex = null;
+        questionDraft = { name: "", type: "text", options: "" };
+    }
+
+    function submitQuestionRequest() {
+        const questionName = questionDraft.name.trim();
+        if (!questionName) return;
+
+        const options = questionDraft.options
+            .split("\n")
+            .map((option) => option.trim())
+            .filter(Boolean);
+
+        const requestMessage = createMessage(
+            "assistant",
+            `Staff request received for question: **${questionName}**\n\nType: ${questionDraft.type}${options.length ? `\nOptions:\n- ${options.join("\n- ")}` : ""}`,
+        );
+
+        requestMessage.questionRequest = {
+            name: questionName,
+            type: questionDraft.type,
+            options,
+        };
+
+        const insertionIndex =
+            typeof questionComposerIndex === "number"
+                ? questionComposerIndex + 1
+                : messages.length;
+
+        const nextMessages = [...messages];
+        nextMessages.splice(insertionIndex, 0, requestMessage);
+        messages = nextMessages;
+
+        cancelQuestionComposer();
+        void scrollToBottom();
+    }
+
     async function handleOptionSelect(value) {
+        if (value === "add-question") {
+            openQuestionComposer(0);
+            return;
+        }
+
         draft = value;
         // Auto-submit the option as the user's response
         await tick();
@@ -344,6 +418,16 @@
     //#region Initial setup
     onMount(async () => {
         userParam = $page.url.searchParams.get("user");
+
+        const levelParam =
+            $page.url.searchParams.get("userLevel") ??
+            $page.url.searchParams.get("level");
+        const parsedLevel = levelParam === null ? null : Number(levelParam);
+        currentUserLevel =
+            parsedLevel === null || Number.isNaN(parsedLevel)
+                ? null
+                : parsedLevel;
+
         bootstrap();
         setUpMessage();
         autoResizeTextarea();
@@ -399,11 +483,94 @@
                     {:else if message.role === "assistant" && message.card?.type === "chart"}
                         <MessageChart {message} />
                     {:else if message.role === "assistant"}
-                        <MessageAssistant
-                            {message}
-                            onOptionSelect={handleOptionSelect}
-                            isLastMessageWithOptions={index === lastAssistantMessageWithOptionsIndex}
-                        />
+                        <div class="flex flex-col items-start gap-2">
+                            <MessageAssistant
+                                {message}
+                                onOptionSelect={handleOptionSelect}
+                                isLastMessageWithOptions={index === lastAssistantMessageWithOptionsIndex}
+                            />
+
+                            {#if isQuestionComposerOpen && questionComposerIndex === index}
+                                <div class="bg-card border-border w-full max-w-xl rounded-xl border p-4 shadow-sm">
+                                    <p class="text-foreground text-sm font-semibold">
+                                        Request a new question
+                                    </p>
+                                    <p class="text-muted-foreground mt-1 text-xs">
+                                        This request is sent to staff for review and can be expanded later.
+                                    </p>
+
+                                    <div class="mt-3 space-y-3">
+                                        <div>
+                                            <label
+                                                class="text-muted-foreground mb-1 block text-xs font-medium uppercase tracking-wide"
+                                                for={`question-name-${message.id}`}
+                                            >
+                                                Question name
+                                            </label>
+                                            <Input
+                                                id={`question-name-${message.id}`}
+                                                bind:value={questionDraft.name}
+                                                placeholder="e.g. Preferred contact method"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label
+                                                class="text-muted-foreground mb-1 block text-xs font-medium uppercase tracking-wide"
+                                                for={`question-type-${message.id}`}
+                                            >
+                                                Question type
+                                            </label>
+                                            <select
+                                                id={`question-type-${message.id}`}
+                                                bind:value={questionDraft.type}
+                                                class="border-input bg-background text-foreground h-9 w-full rounded-md border px-2.5 text-sm"
+                                            >
+                                                <option value="text">Text</option>
+                                                <option value="number">Number</option>
+                                                <option value="date">Date</option>
+                                                <option value="select">Select</option>
+                                            </select>
+                                        </div>
+
+                                        {#if questionDraft.type === "select"}
+                                            <div>
+                                                <label
+                                                    class="text-muted-foreground mb-1 block text-xs font-medium uppercase tracking-wide"
+                                                    for={`question-options-${message.id}`}
+                                                >
+                                                    Options (one per line)
+                                                </label>
+                                                <Textarea
+                                                    id={`question-options-${message.id}`}
+                                                    bind:value={questionDraft.options}
+                                                    rows="4"
+                                                    placeholder="Option 1&#10;Option 2"
+                                                />
+                                            </div>
+                                        {/if}
+                                    </div>
+
+                                    <div class="mt-4 flex items-center gap-2">
+                                        <Button
+                                            type="button"
+                                            size="sm"
+                                            onclick={submitQuestionRequest}
+                                        >
+                                            Send request
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            onclick={cancelQuestionComposer}
+                                        >
+                                            Cancel
+                                        </Button>
+                                    </div>
+                                </div>
+                            {/if}
+                        </div>
                     {:else if message.role === "thinking"}
                         <MessageThinking {message} />
                     {/if}
