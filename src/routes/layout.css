@@ -43,6 +43,7 @@
 		--chart-green: oklch(63.376% 0.15594 151.928);
 			--chart-red: oklch(57.764% 0.22259 27.915);
 				--chart-yellow: oklch(94.342% 0.19919 105.972);
+	--button-blue: oklch(57.764% 0.22259 27.915);
 }
 
 .dark {
@@ -81,6 +82,7 @@
 				--chart-green: oklch(79.352% 0.26999 142.511);
 			--chart-red: oklch(62.946% 0.2508 28.582);
 				--chart-yellow: oklch(95.524% 0.16945 106.334);
+	--button-blue: oklch(79.352% 0.26999 142.511);
 }
 
 @theme inline {
@@ -123,6 +125,7 @@
 	--radius-2xl: calc(var(--radius) * 1.8);
 	--radius-3xl: calc(var(--radius) * 2.2);
 	--radius-4xl: calc(var(--radius) * 2.6);
+	--color-button-blue: var(--button-blue);
 }
 
 @layer base {

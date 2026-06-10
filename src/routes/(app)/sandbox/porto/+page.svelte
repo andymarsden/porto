@@ -554,6 +554,7 @@
                                     <div class="mt-4 flex items-center gap-2">
                                         <Button
                                             type="button"
+                                            class= "bg-button-blue hover:bg-blue-700 text-white"
                                             size="sm"
                                             onclick={submitQuestionRequest}
                                         >
